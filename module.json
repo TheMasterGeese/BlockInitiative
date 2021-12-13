@@ -1,0 +1,37 @@
+{
+    "name": "blockinitiative",
+    "title": "PF2E Block Inititive Module",
+    "description": "Overhauls initiative so that players and enemies each go in their own initiatve blocks - designed for games run asynchronously",
+    "author": "Khankar#2236",
+    "authors": [],
+    "url": "https://github.com/TheMasterGeese/BlockInitiative",
+    "readme": "https://github.com/TheMasterGeese/BlockInitiative/README.md",
+    "bugs": "https://github.com/crash1115/ready-check/issues",
+    "flags": {},
+    "version": "1.2.3",
+    "minimumCoreVersion": "0.8.2",
+    "compatibleCoreVersion": "0.8.9",
+    "scripts": [],
+    "esmodules": [
+      "ready-check.js"
+    ],
+    "styles": [
+      "styles/ready-check.css"
+    ],
+    "languages": [
+      {
+        "lang": "en",
+        "name": "English",
+        "path": "lang/en.json"
+      }
+    ],
+    "packs": [],
+    "system": [],
+    "dependencies": [],
+    "socket": true,
+    "manifest": "https://raw.githubusercontent.com/crash1115/ready-check/main/module.json",
+    "download": "https://github.com/crash1115/ready-check/releases/download/v1.2.3/ready-check.zip",
+    "protected": false,
+    "coreTranslation": false
+  }
+  
