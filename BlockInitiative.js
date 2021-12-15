@@ -7,6 +7,7 @@ Hooks.on("ready", async function(){
 
 async function sendPlayersReadyMessage() {
     $.ajax({
+        method: 'POST',
         url: discordURL,
         data: "all players are ready",
         success: function( response )  {
