@@ -8,7 +8,7 @@
     "readme": "https://github.com/TheMasterGeese/BlockInitiative/README.md",
     "bugs": "https://github.com/TheMasterGeese/BlockInitiative/issues",
     "flags": {},
-    "version": "0.0.1",
+    "version": "0.0.2",
     "minimumCoreVersion": "0.8.2",
     "compatibleCoreVersion": "0.8.9",
     "scripts": [],
