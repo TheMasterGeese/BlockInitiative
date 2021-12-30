@@ -333,7 +333,6 @@ async function sendDiscordMessage(message) {
         data: message,
     });
 }
-BLOCKINITIATIVE.DiscordUrl
 // Block-Initiative Module
 function buildMessage(pingTargets, message) {
     let messageString = "{ content : \""
