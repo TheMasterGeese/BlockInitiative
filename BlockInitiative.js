@@ -37,13 +37,31 @@ Hooks.once("init", function () {
         default: 'modules/block-initiative/sounds/notification.mp3',
         type: String
     });
+
+    // register settings menu
 });
+
+// setting menu
+    // <div id = "discord-id-config" class="app window-app form" data-appid=??? style="z-index: 101; width=660px; height = 554px; left: 630px; top: 191.5px;">
+        // <section class="window-content">
+            // <form autocomplete="off" onsubmit="event.preventDefault();">
+                // <header class = "table-header flexrow"> 
+                // </header>
+                // <s
+            //</form>
+        // </section>
+    // </div>
+
+
+
+
 
 // Reset Status When the Game is Ready
 Hooks.on("ready", async function () {
     // Ready-Check Module
     await setAllToNotReady();
     setAllDiscordIDFlags();
+    getUsersInCombat();
 });
 
 // Ready-Check Module
@@ -70,10 +88,20 @@ async function setAllToNotReady() {
 }
 
 async function setAllDiscordIDFlags() {
-    // TODO: Get these values from the settings.
+    // TODO: Get these values from the settings instead of hardcoding like this
     for (var i = 0; i < game.users.contents.length; i++) {
         if (game.users.contents[i].isGM) {
-            await game.users.contents[i].setFlag('block-initiative', 'discordID', "356634652963897345");
+            if (await game.users.contents[i].data.name === "Khankar") {
+                await game.users.contents[i].setFlag('block-initiative', 'discordID', "356634652963897345");
+            } else if (await game.users.contents[i].data.name === "diablofan") {
+                await game.users.contents[i].setFlag('block-initiative', 'discordID', "202599187332857873");
+            } else if (await game.users.contents[i].data.name === "Ace-Meow5") {
+                await game.users.contents[i].setFlag('block-initiative', 'discordID', "310978975805472768");
+            } else if (await game.users.contents[i].data.name === "thugmunch") {
+                await game.users.contents[i].setFlag('block-initiative', 'discordID', "315620825426558976");
+            } else if (await game.users.contents[i].data.name === "thugmunch") {
+                await game.users.contents[i].setFlag('block-initiative', 'discordID', "501187142073057282");
+            }
         }
     }
 }
@@ -309,7 +337,7 @@ function checkStatusForMessages() {
     } else {
         return;
     }
-    let userList = getUserDiscordIDs(game.user.hasPlayerOwner)
+    let userList = getUsersInCombat(game.user.hasPlayerOwner)
     let message = buildMessage(userList, text)
     sendDiscordMessage(message);
 }
@@ -342,6 +370,7 @@ async function sendDiscordMessage(message) {
         data: message,
     });
 }
+
 // Block-Initiative Module
 function buildMessage(pingTargets, message) {
     let messageString = "";
@@ -358,10 +387,29 @@ function buildMessage(pingTargets, message) {
 }
 
 // Block-Initiative Module
+function getUsersInCombat() {
+    let usersInCombat = [];
+    let combatants = Object.values(game.combat.combatants);
+    let actorIDs = [];
+    for (let i = 0; i < combatants.length; i++) {
+        actorIDs.push(combatants[i].data.actorId);
+    }
+    for (let j = 0; j < game.users.contents.length; j++) {
+        let user = game.users.contents[j];
+        let characterID = user.character.id;
+        if(actorIDs.indexOf(characterID)) {
+            usersInCombat.push(user)
+        }
+    }
+    return usersInCombat;
+}
+
+// Block-Initiative Module
 async function getUserDiscordIDs(getGMs) {
-    let targetUsers = new Array();
-    for (let i = 0; i < game.users.contents.length; i++) {
-        let user = game.users.contents[i];
+    let users = getUsersInCombat();
+    let targetUsers = [];
+    for (let i = 0; i < users.length; i++) {
+        let user = users[i];
         if ((getGMs && !user.hasPlayerOwner) ||
             (!getGMs && user.hasPlayerOwner)) {
 
