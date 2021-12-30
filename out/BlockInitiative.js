@@ -80,7 +80,7 @@ function createButtons() {
     const sidebarBtn = $(`<a class="crash-block-initiative-sidebar" title="` + btnTitle + `"><i class="fas fa-hourglass-half"></i></a>`);
     const popoutBtn = $(`<a class="crash-block-initiative-popout" title="` + btnTitle + `"><i class="fas fa-hourglass-half"></i></a>`);
     let sidebarDiv = $("#sidebar").find(".chat-control-icon");
-    let popoutDividebar = $("#chat-popout").find(".chat-control-icon");
+    let popoutDiv = $("#chat-popout").find(".chat-control-icon");
     let btnAlreadyInSidebar = $("#sidebar").find(".crash-block-initiative-sidebar").length > 0;
     let btnAlreadyInPopout = $("#chat-popout").find(".crash-block-initiative-popout").length > 0;
 
