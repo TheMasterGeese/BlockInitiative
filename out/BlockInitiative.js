@@ -340,7 +340,7 @@ function buildMessage(pingTargets, message) {
         messageString += "@" + pingTargets[i] + " "
     }
     messageString += message;
-    messageString += "} \""
+    messageString += "\" } "
     messageString = JSON.stringify(messageString);
 
     return messageString;
