@@ -335,15 +335,17 @@ async function sendDiscordMessage(message) {
 }
 // Block-Initiative Module
 function buildMessage(pingTargets, message) {
-    let messageString = "{ \"content\" : \""
+    let messageString = "";
     for (let i = 0; i < pingTargets.length; i++) {
         messageString += "@" + pingTargets[i] + " "
     }
-    messageString += message;
-    messageString += "\" } "
-    messageString = JSON.stringify(messageString);
+    let messageJSON = {
+        "content": messageString
+    }
 
-    return messageString;
+    let messageReturn = JSON.stringify(messageJSON);
+
+    return messageReturn;
 }
 
 // Block-Initiative Module
