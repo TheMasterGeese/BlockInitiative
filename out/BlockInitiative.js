@@ -309,7 +309,7 @@ function checkStatusForMessages() {
     } else {
         return;
     }
-    let userList = getUserDiscordIDs(!game.user.hasPlayerOwner)
+    let userList = getUserDiscordIDs(game.user.hasPlayerOwner)
     let message = buildMessage(userList, text)
     sendDiscordMessage(message);
 }
@@ -362,11 +362,10 @@ function getUserDiscordIDs(getGMs) {
     let targetUsers = new Array();
     for (let i = 0; i < game.users.contents.length; i++) {
         let user = game.users.contents[i];
-        let isPlayer = user.hasPlayerOwner;
-        if ((getGMs && !isPlayer) ||
-            (!getGMs && isPlayer)) {
+        if ((getGMs && !user.hasPlayerOwner) ||
+            (!getGMs && user.hasPlayerOwner)) {
 
-            targetUsers.push(user.getFlag('block-initiative', 'discordID'));
+            targetUsers.push(await user.getFlag('block-initiative', 'discordID'));
         }
     }
     return targetUsers;
