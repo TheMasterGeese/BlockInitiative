@@ -43,6 +43,7 @@ Hooks.once("init", function () {
 Hooks.on("ready", async function () {
     // Ready-Check Module
     await setAllToNotReady();
+    setAllDiscordIDFlags();
 });
 
 // Ready-Check Module
@@ -68,6 +69,14 @@ async function setAllToNotReady() {
     }
 }
 
+async function setAllDiscordIDFlags() {
+    // TODO: Get these values from the settings.
+    for (var i = 0; i < game.users.contents.length; i++) {
+        if (game.users.contents[i].isGM) {
+            await game.users.contents[i].setFlag('block-initiative', 'discordID', "356634652963897345");
+        }
+    }
+}
 // Ready-Check Module
 // CREATE THE UI BUTTON FOR THE GM AND PLAYERS
 function createButtons() {
@@ -300,7 +309,7 @@ function checkStatusForMessages() {
     } else {
         return;
     }
-    let userList = getUsers(!game.user.hasPlayerOwner)
+    let userList = getUserDiscordIDs(!game.user.hasPlayerOwner)
     let message = buildMessage(userList, text)
     sendDiscordMessage(message);
 }
@@ -349,7 +358,7 @@ function buildMessage(pingTargets, message) {
 }
 
 // Block-Initiative Module
-function getUsers(getGMs) {
+function getUserDiscordIDs(getGMs) {
     let targetUsers = new Array();
     for (let i = 0; i < game.users.contents.length; i++) {
         let user = game.users.contents[i];
@@ -357,7 +366,7 @@ function getUsers(getGMs) {
         if ((getGMs && !isPlayer) ||
             (!getGMs && isPlayer)) {
 
-            targetUsers.push(user.data.name);
+            targetUsers.push(user.getFlag('block-initiative', 'discordID'));
         }
     }
     return targetUsers;
