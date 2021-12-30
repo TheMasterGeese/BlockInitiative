@@ -42,15 +42,15 @@ Hooks.once("init", function () {
 });
 
 // setting menu
-    // <div id = "discord-id-config" class="app window-app form" data-appid=??? style="z-index: 101; width=660px; height = 554px; left: 630px; top: 191.5px;">
-        // <section class="window-content">
-            // <form autocomplete="off" onsubmit="event.preventDefault();">
-                // <header class = "table-header flexrow"> 
-                // </header>
-                // <s
-            //</form>
-        // </section>
-    // </div>
+// <div id = "discord-id-config" class="app window-app form" data-appid=??? style="z-index: 101; width=660px; height = 554px; left: 630px; top: 191.5px;">
+// <section class="window-content">
+// <form autocomplete="off" onsubmit="event.preventDefault();">
+// <header class = "table-header flexrow"> 
+// </header>
+// <s
+//</form>
+// </section>
+// </div>
 
 
 
@@ -61,7 +61,7 @@ Hooks.on("ready", async function () {
     // Ready-Check Module
     await setAllToNotReady();
     setAllDiscordIDFlags();
-    getUsersInCombat();
+    getPlayersInCombat();
 });
 
 // Ready-Check Module
@@ -337,7 +337,7 @@ function checkStatusForMessages() {
     } else {
         return;
     }
-    let userList = getUsersInCombat(game.user.hasPlayerOwner)
+    let userList = getPlayersInCombat(game.user.hasPlayerOwner)
     let message = buildMessage(userList, text)
     sendDiscordMessage(message);
 }
@@ -365,7 +365,7 @@ async function AreUsersReady(getGMs) {
 async function sendDiscordMessage(message) {
     $.ajax({
         method: 'POST',
-        url:  game.i18n.localize("BLOCKINITIATIVE.DiscordUrl"),
+        url: game.i18n.localize("BLOCKINITIATIVE.DiscordUrl"),
         contentType: "application/json",
         data: message,
     });
@@ -375,7 +375,7 @@ async function sendDiscordMessage(message) {
 function buildMessage(pingTargets, message) {
     let messageString = "";
     for (let i = 0; i < pingTargets.length; i++) {
-        messageString += "<@" + pingTargets[i] + "> "
+        messageString += "<@" + pingTargets[i].data.name + "> "
     }
     let messageJSON = {
         "content": messageString + " " + message
@@ -387,7 +387,7 @@ function buildMessage(pingTargets, message) {
 }
 
 // Block-Initiative Module
-function getUsersInCombat() {
+function getPlayersInCombat() {
     let usersInCombat = [];
     let combatants = Object.values(game.combat.combatants);
     let actorIDs = [];
@@ -396,9 +396,11 @@ function getUsersInCombat() {
     }
     for (let j = 0; j < game.users.contents.length; j++) {
         let user = game.users.contents[j];
-        let characterID = user.character.id;
-        if(actorIDs.indexOf(characterID)) {
-            usersInCombat.push(user)
+        if (!user.isGM && user.character) {
+            let characterID = user.character.id;
+            if (actorIDs.indexOf(characterID)) {
+                usersInCombat.push(user)
+            }
         }
     }
     return usersInCombat;
@@ -406,7 +408,7 @@ function getUsersInCombat() {
 
 // Block-Initiative Module
 async function getUserDiscordIDs(getGMs) {
-    let users = getUsersInCombat();
+    let users = getPlayersInCombat();
     let targetUsers = [];
     for (let i = 0; i < users.length; i++) {
         let user = users[i];
