@@ -8,7 +8,7 @@
     "readme": "https://github.com/TheMasterGeese/BlockInitiative/README.md",
     "bugs": "https://github.com/TheMasterGeese/BlockInitiative/issues",
     "flags": {},
-    "version": "0.0.10",
+    "version": "0.0.11",
     "minimumCoreVersion": "0.8.2",
     "compatibleCoreVersion": "0.8.9",
     "scripts": [],
@@ -27,7 +27,7 @@
     "dependencies": [],
     "socket": true,
     "manifest": "https://raw.githubusercontent.com/TheMasterGeese/BlockInitiative/main/module.json",
-    "download": "https://github.com/TheMasterGeese/BlockInitiative/releases/download/v0.0.10/BlockInitiative.zip",
+    "download": "https://github.com/TheMasterGeese/BlockInitiative/releases/download/v0.0.11/BlockInitiative.zip",
     "protected": false,
     "coreTranslation": false
   }

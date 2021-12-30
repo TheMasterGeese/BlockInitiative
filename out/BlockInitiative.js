@@ -293,14 +293,14 @@ async function updatePlayersWindow() {
 // If the appropriate conditions are met, send a message over discord informing players it is their turn.
 function checkStatusForMessages() {
     let text;
-    if (user.hasPlayerOwner && AreUsersReady(false)) {
+    if (game.user.hasPlayerOwner && AreUsersReady(false)) {
         text = game.i18n.localize("BLOCKINITIATIVE.ResolvePlayerActionsMessage");
     } else if (AreUsersReady(true)) {
         text = game.i18n.localize("BLOCKINITIATIVE.PlayersReactMessage");
     } else {
         return;
     }
-    let userList = getUsers(!user.hasPlayerOwner)
+    let userList = getUsers(!game.user.hasPlayerOwner)
     let message = buildMessage(userList, text)
     sendDiscordMessage(message);
 }
