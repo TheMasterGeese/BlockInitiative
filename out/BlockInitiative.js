@@ -340,7 +340,7 @@ function buildMessage(pingTargets, message) {
         messageString += "@" + pingTargets[i] + " "
     }
     let messageJSON = {
-        "content": messageString
+        "content": messageString + " " + message
     }
 
     let messageReturn = JSON.stringify(messageJSON);
