@@ -335,7 +335,7 @@ async function sendDiscordMessage(message) {
 }
 // Block-Initiative Module
 function buildMessage(pingTargets, message) {
-    let messageString = "{ content : \""
+    let messageString = "{ \"content\" : \""
     for (let i = 0; i < pingTargets.length; i++) {
         messageString += "@" + pingTargets[i] + " "
     }
