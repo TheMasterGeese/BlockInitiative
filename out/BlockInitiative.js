@@ -328,12 +328,12 @@ async function AreUsersReady(getGMs) {
 async function sendDiscordMessage(message) {
     $.ajax({
         method: 'POST',
-        url: DISCORD_URL,
+        url:  game.i18n.localize("BLOCKINITIATIVE.DiscordUrl"),
         contentType: "application/json",
         data: message,
     });
 }
-
+BLOCKINITIATIVE.DiscordUrl
 // Block-Initiative Module
 function buildMessage(pingTargets, message) {
     let messageString = "{ content : \""
