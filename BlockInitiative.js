@@ -358,7 +358,7 @@ function buildMessage(pingTargets, message) {
 }
 
 // Block-Initiative Module
-function getUserDiscordIDs(getGMs) {
+async function getUserDiscordIDs(getGMs) {
     let targetUsers = new Array();
     for (let i = 0; i < game.users.contents.length; i++) {
         let user = game.users.contents[i];
