@@ -337,7 +337,7 @@ async function sendDiscordMessage(message) {
 function buildMessage(pingTargets, message) {
     let messageString = "";
     for (let i = 0; i < pingTargets.length; i++) {
-        messageString += "@" + pingTargets[i] + " "
+        messageString += "<@>" + pingTargets[i] + " "
     }
     let messageJSON = {
         "content": messageString + " " + message
