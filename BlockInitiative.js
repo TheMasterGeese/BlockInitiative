@@ -1,4 +1,8 @@
+// TODO #2: add ability to enable/disable discord integration in settings.
+// TODO #3: Improve on commenting.
 
+
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // Register Game Settings
 Hooks.once("init", function () {
@@ -64,6 +68,7 @@ Hooks.on("ready", async function () {
     getPlayersInCombat();
 });
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // Set Up Buttons and Socket Stuff
 Hooks.on('renderChatLog', async function () {
@@ -71,12 +76,14 @@ Hooks.on('renderChatLog', async function () {
     createSocketHandler();
 });
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // Update the display of the Player UI.
 Hooks.on('renderPlayerList', async function () {
     await updatePlayersWindow();
 })
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // SET ALL USERS STATUS TO NOT READY (GM)
 async function setAllToNotReady() {
@@ -88,23 +95,22 @@ async function setAllToNotReady() {
 }
 
 async function setAllDiscordIDFlags() {
-    // TODO: Get these values from the settings instead of hardcoding like this
+    // TODO #1: Get these values from the settings instead of hardcoding like this
     for (var i = 0; i < game.users.contents.length; i++) {
-        if (game.users.contents[i].isGM) {
-            if (await game.users.contents[i].data.name === "Khankar") {
-                await game.users.contents[i].setFlag('block-initiative', 'discordID', "356634652963897345");
-            } else if (await game.users.contents[i].data.name === "diablofan") {
-                await game.users.contents[i].setFlag('block-initiative', 'discordID', "202599187332857873");
-            } else if (await game.users.contents[i].data.name === "Ace-Meow5") {
-                await game.users.contents[i].setFlag('block-initiative', 'discordID', "310978975805472768");
-            } else if (await game.users.contents[i].data.name === "thugmunch") {
-                await game.users.contents[i].setFlag('block-initiative', 'discordID', "315620825426558976");
-            } else if (await game.users.contents[i].data.name === "thugmunch") {
-                await game.users.contents[i].setFlag('block-initiative', 'discordID', "501187142073057282");
-            }
+        if (await game.users.contents[i].data.name === "Khankar") {
+            await game.users.contents[i].setFlag('block-initiative', 'discordID', "356634652963897345");
+        } else if (await game.users.contents[i].data.name === "diablofan") {
+            await game.users.contents[i].setFlag('block-initiative', 'discordID', "202599187332857873");
+        } else if (await game.users.contents[i].data.name === "Ace-Meow5") {
+            await game.users.contents[i].setFlag('block-initiative', 'discordID', "310978975805472768");
+        } else if (await game.users.contents[i].data.name === "thugmunch") {
+            await game.users.contents[i].setFlag('block-initiative', 'discordID', "315620825426558976");
+        } else if (await game.users.contents[i].data.name === "σ+jω") {
+            await game.users.contents[i].setFlag('block-initiative', 'discordID', "501187142073057282");
         }
     }
 }
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // CREATE THE UI BUTTON FOR THE GM AND PLAYERS
 function createButtons() {
@@ -141,6 +147,7 @@ function createButtons() {
 
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // CREATE THE SOCKET HANDLER
 function createSocketHandler() {
@@ -154,6 +161,7 @@ function createSocketHandler() {
     });
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // DISPLAY DIALOG ASKING GM WHAT THEY WANT TO DO
 function displayGmDialog() {
@@ -177,6 +185,7 @@ function displayGmDialog() {
     }).render(true);
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // INITIATE A READY CHECK (GM)
 async function initReadyCheck() {
@@ -191,6 +200,7 @@ async function initReadyCheck() {
     }
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // DISPLAY STATUS UPDATE DIALOG AND SEND RESPONSE TO GM
 function displayStatusUpdateDialog() {
@@ -216,6 +226,7 @@ function displayStatusUpdateDialog() {
     }).render(true);
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // DISPLAY READY CHECK DIALOG AND SEND RESPONSE TO GM (PLAYER)
 function displayReadyCheckDialog() {
@@ -236,6 +247,7 @@ function displayReadyCheckDialog() {
     }).render(true);
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // UPDATE USER READY STATUS
 //  If the user is a GM, just update it since the socket go to the sender, and none of the recipients (players)
@@ -248,6 +260,7 @@ async function updateReadyStatus(data) {
     }
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // PROCESS READY CHECK RESPONSE (GM)
 async function processReadyResponse(data) {
@@ -258,6 +271,7 @@ async function processReadyResponse(data) {
     }
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // DISPLAY A CHAT MESSAGE WHEN A USER RESPONDS TO A READY CHECK
 function displayReadyCheckChatMessage(data) {
@@ -268,6 +282,7 @@ function displayReadyCheckChatMessage(data) {
     }
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // DISPLAY A CHAT MESSAGE WHEN A USER UPDATES THEIR STATUS
 function displayStatusUpdateChatMessage(data) {
@@ -279,6 +294,7 @@ function displayStatusUpdateChatMessage(data) {
     }
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // PLAY SOUND EFFECT ASSOCIATED WITH READY CHECK START
 function playReadyCheckAlert() {
@@ -291,6 +307,7 @@ function playReadyCheckAlert() {
     }
 }
 
+// TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
 // Ready-Check Module
 // UPDATE PLAYER UI
 async function updatePlayersWindow() {
@@ -328,7 +345,7 @@ async function updatePlayersWindow() {
 
 // Block-Initiative Module
 // If the appropriate conditions are met, send a message over discord informing players it is their turn.
-function checkStatusForMessages() {
+async function checkStatusForMessages() {
     let text;
     if (game.user.hasPlayerOwner && AreUsersReady(false)) {
         text = game.i18n.localize("BLOCKINITIATIVE.ResolvePlayerActionsMessage");
@@ -337,7 +354,7 @@ function checkStatusForMessages() {
     } else {
         return;
     }
-    let userList = getPlayersInCombat(game.user.hasPlayerOwner)
+    let userList = await getUserDiscordIDs(game.user.hasPlayerOwner)
     let message = buildMessage(userList, text)
     sendDiscordMessage(message);
 }
@@ -375,7 +392,7 @@ async function sendDiscordMessage(message) {
 function buildMessage(pingTargets, message) {
     let messageString = "";
     for (let i = 0; i < pingTargets.length; i++) {
-        messageString += "<@" + pingTargets[i].data.name + "> "
+        messageString += "<@" + pingTargets[i] + "> "
     }
     let messageJSON = {
         "content": messageString + " " + message
@@ -389,17 +406,19 @@ function buildMessage(pingTargets, message) {
 // Block-Initiative Module
 function getPlayersInCombat() {
     let usersInCombat = [];
-    let combatants = Object.values(game.combat.combatants);
+    let combatants = Array.from(game.combat.combatants.values());
     let actorIDs = [];
     for (let i = 0; i < combatants.length; i++) {
         actorIDs.push(combatants[i].data.actorId);
     }
     for (let j = 0; j < game.users.contents.length; j++) {
         let user = game.users.contents[j];
-        if (!user.isGM && user.character) {
+        if (user.isGM) {
+            usersInCombat.push(user);
+        } else if (!user.isGM && user.character) {
             let characterID = user.character.id;
-            if (actorIDs.indexOf(characterID)) {
-                usersInCombat.push(user)
+            if (actorIDs.indexOf(characterID) != -1) {
+                usersInCombat.push(user);
             }
         }
     }
