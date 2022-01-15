@@ -429,7 +429,12 @@ function getPlayersInCombat() {
 
 // Block-Initiative Module
 async function getUserDiscordIDs(getGMs) {
-    let users = getPlayersInCombat();
+    let users;
+    if (game.combat) {
+        users = getPlayersInCombat();
+    } else {
+        users = game.users.contents;
+    }
     let targetUsers = [];
     for (let i = 0; i < users.length; i++) {
         let user = users[i];
