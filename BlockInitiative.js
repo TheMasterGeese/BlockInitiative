@@ -65,7 +65,9 @@ Hooks.on("ready", async function () {
     // Ready-Check Module
     // await setAllToNotReady();
     setAllDiscordIDFlags();
-    getPlayersInCombat();
+    if (game.combat) {
+        getPlayersInCombat();
+    }
 });
 
 // TODO #4: Remove Ready-Check Module methods from this codebase, allow them to be implemented in the other module.
