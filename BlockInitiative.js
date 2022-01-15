@@ -63,7 +63,7 @@ Hooks.once("init", function () {
 // Reset Status When the Game is Ready
 Hooks.on("ready", async function () {
     // Ready-Check Module
-    await setAllToNotReady();
+    // await setAllToNotReady();
     setAllDiscordIDFlags();
     getPlayersInCombat();
 });
