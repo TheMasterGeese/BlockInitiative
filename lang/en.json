@@ -1,3 +1,4 @@
 {
-  
+  "BLOCKINITIATIVE.SettingsEnableInitiativeHandicapTitle" : "Enable Initiative Handicap",
+  "BLOCKINITIATIVE.SettingsEnableInitiativeHandicapHint" : "Block Initiative inherently puts enemies at a disadvantage. To offset this, enemies may be given a modifier to their initiative rolls."
 }
