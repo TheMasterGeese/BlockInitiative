@@ -80,14 +80,21 @@ Hooks.on("renderEncounterTrackerPF2e", function (app: Application, html: JQuery,
 });
 
 // If an enemy ends their turn and they are not behind all players, they should be moved so that they are behind all players.
-Hooks.on("pf2e.endTurn", function (combatant: Combatant, encounter: Combat) {
+Hooks.on("pf2e.endTurn", async function (combatant: Combatant, encounter: Combat) {
     const initiative: MinMaxInitiative = getMinMaxPlayerInitiative(encounter);
 
-    if (combatant.initiative >= initiative.playerInitMax) {
-        game.combat.setInitiative(combatant.id, initiative.playerInitMin - 1).catch((error: unknown) => {
-            Hooks.callAll("error", "mg-block-initiative", error)
-        });
+    if (combatant.isNPC && combatant.initiative >= initiative.playerInitMax) {
+        await encounter.setFlag('mg-ready-check', 'overrideNextTurn', true).then((result) => {
+            return result.setInitiative(combatant.id, initiative.playerInitMin - 1)
+        })
+    }
+});
 
+// listens for flag to override the next turn.
+Hooks.on("pf2e.startTurn", async function (_combatant: Combatant, encounter: Combat) {
+    if (encounter.getFlag('mg-ready-check', 'overrideNextTurn')) {
+        encounter.data.turn = 0;
+        encounter = await encounter.unsetFlag('mg-ready-check', 'overrideNextTurn');
     }
 });
 
@@ -142,7 +149,7 @@ async function applyInitiativeHandicap(encounter : Combat) {
 
 async function sortIntoBlockInitiative() {
     console.log("sortIntoBlocks button clicked");
-    const encounter = game.combat;
+    const encounter : Combat = game.combat;
     await applyInitiativeHandicap(encounter)
 
     // After handicap is applied, get min and max player initiative
