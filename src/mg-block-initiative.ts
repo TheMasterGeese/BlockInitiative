@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/*
 let libWrapper: {
     is_fallback: boolean;
     // LibWrapper requires this type to be a function
     // eslint-disable-next-line @typescript-eslint/ban-types
     register(module: string, target: number | string, fn: Function, type: string): void
 };
-
+*/
 // Register Game Settings
 Hooks.once("init", function () {
     game.settings.register("mg-block-initiative", "InitiativeHandicap", {
@@ -86,7 +87,7 @@ Hooks.on("pf2e.endTurn", function (combatant: Combatant, encounter: Combat) {
         game.combat.setInitiative(combatant.id, initiative.playerInitMin - 1).catch((error: unknown) => {
             Hooks.callAll("error", "mg-block-initiative", error)
         });
-        
+
     }
 });
 

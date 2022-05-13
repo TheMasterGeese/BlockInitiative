@@ -26,6 +26,9 @@
 		{
 			"name": "pf2e",
 			"type": "system"
+		},
+		{
+			"name": "lib-wrapper"
 		}
 	]
 }

@@ -1,4 +1,6 @@
 {
-  "BLOCKINITIATIVE.SettingsEnableInitiativeHandicapTitle" : "Enable Initiative Handicap",
-  "BLOCKINITIATIVE.SettingsEnableInitiativeHandicapHint" : "Block Initiative inherently puts enemies at a disadvantage. To offset this, enemies may be given a modifier to their initiative rolls."
+  "BLOCKINITIATIVE.SettingsInitiativeHandicapTitle" : "Initiative Handicap",
+  "BLOCKINITIATIVE.SettingsInitiativeHandicapHint" : "Block Initiative inherently puts enemies at a disadvantage. To offset this, players may be given a modifier to their initiative rolls (The recommended value is -3).",
+  
+  "BLOCKINITIATIVE.SortIntoBlocksButton" : "Sort combatants into blocks"
 }
