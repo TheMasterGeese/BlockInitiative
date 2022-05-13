@@ -56,10 +56,18 @@ Hooks.on("renderEncounterTrackerPF2e", function (app: Application, html: JQuery,
     // Add "Sort Into Blocks" button
     if (game.user.role === 4) { // Render for GM
         createSortIntoBlocksButton();
+        
     }
     
-    // Add "Reaction" button
-    // Render for all users, whether Player or GM
+    // Add "Reaction" buttons
+    createReactionButtons();
+    
+    
+    
+    
+        // For players, only render the reaction button for combatants they control
+        // For GM, only render the reaction button for NPCs.
+
     // For players, this affects either the currently selected token or defaults to their character
     // For GMs, this affects the currently selected token
     // Starts ready check targeting all players with a token in the current scene
@@ -160,7 +168,6 @@ async function sortIntoBlockInitiative() {
 }
 
 function createSortIntoBlocksButton() {
-    //set title based on whether the user is player or GM
 	const btnTitle : string = game.i18n.localize("BLOCKINITIATIVE.SortIntoBlocksButton");
 
     const sortIntoBlocksButton = $(`<a class="combat-control mg-block-initiative sort-into-blocks" title="${btnTitle}"><i class="fas fa-arrow-down"></i></a>`);
@@ -183,6 +190,14 @@ function createSortIntoBlocksButton() {
 		event.preventDefault();
 		void sortIntoBlockInitiative();
 	}
+}
+
+function createReactionButtons() {
+    const currentUser = game.user;
+    const btnTitle : string = game.i18n.localize("BLOCKINITIATIVE.ReactionButton");
+
+    const reactionButton = $(`<a class="combatant-control mg-block-initiative reactionButton" title="${btnTitle}"><i src="systems/pf2e/icons/actions/Reaction.webp"></i></a>`);
+
 }
 class MinMaxInitiative {
     playerInitMax: number
