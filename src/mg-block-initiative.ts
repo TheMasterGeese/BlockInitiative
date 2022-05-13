@@ -1,14 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/*
-let libWrapper: {
-    is_fallback: boolean;
-    // LibWrapper requires this type to be a function
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    register(module: string, target: number | string, fn: Function, type: string): void
-};
-*/
+
 // Register Game Settings
 Hooks.once("init", function () {
     game.settings.register("mg-block-initiative", "InitiativeHandicap", {
@@ -19,30 +12,6 @@ Hooks.once("init", function () {
         default: "-3",
         type: String
     });
-
-    // libWrapper will exist at runtime thanks to the libWrapper module.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    /*
-    libWrapper = globalThis.libWrapper;
-    libWrapper.register('mg-block-initiative', 'Combat.prototype.rollAll',
-        // eslint-disable-next-line @typescript-eslint/ban-types
-        async function (wrapped: Function, ...args: unknown[]) {
-
-            console.log('Block Initiative Calling Combat.prototype.rollAll');
-            await wrapped(...args) as Promise<void>
-            await sortIntoBlockInitiative();
-            // Calculate the minimum and maximum initiative scores among PCs
-            // Move any monsters that did not beat all PCs to last in initiative
-
-        }, 'WRAPPER');
-    */
-
-});
-
-Hooks.once('ready', () => {
-    if (!game.modules.get('lib-wrapper')?.active && (game.user as User).isGM)
-        ui.notifications.error("Module mg-block-initiative requires the 'libWrapper' module. Please install and activate it.");
 });
 
 Hooks.on("renderEncounterTrackerPF2e", function (app: Application, html: JQuery, data: object) {
@@ -88,14 +57,21 @@ Hooks.on("renderEncounterTrackerPF2e", function (app: Application, html: JQuery,
 });
 
 // If an enemy ends their turn and they are not behind all players, they should be moved so that they are behind all players.
-Hooks.on("pf2e.endTurn", function (combatant: Combatant, encounter: Combat) {
+Hooks.on("pf2e.endTurn", async function (combatant: Combatant, encounter: Combat) {
     const initiative: MinMaxInitiative = getMinMaxPlayerInitiative(encounter);
 
-    if (combatant.initiative >= initiative.playerInitMax) {
-        game.combat.setInitiative(combatant.id, initiative.playerInitMin - 1).catch((error: unknown) => {
-            Hooks.callAll("error", "mg-block-initiative", error)
-        });
+    if (combatant.isNPC && combatant.initiative >= initiative.playerInitMax) {
+        await encounter.setFlag('mg-ready-check', 'overrideNextTurn', true).then((result) => {
+            return result.setInitiative(combatant.id, initiative.playerInitMin - 1)
+        })
+    }
+});
 
+// listens for flag to override the next turn.
+Hooks.on("pf2e.startTurn", async function (_combatant: Combatant, encounter: Combat) {
+    if (encounter.getFlag('mg-ready-check', 'overrideNextTurn')) {
+        encounter.data.turn = 0;
+        encounter = await encounter.unsetFlag('mg-ready-check', 'overrideNextTurn');
     }
 });
 
@@ -116,7 +92,7 @@ function getMinMaxPlayerInitiative(combat: Combat): MinMaxInitiative {
     let lowestPlayerInit = 999999;
 
     combat.combatants.forEach((combatant: Combatant) => {
-        if (combatant.hasPlayerOwner && combatant.initiative !== null) {
+        if (combatant.hasPlayerOwner && combatant.initiative != null) {
             highestPlayerInit = Math.max(highestPlayerInit, combatant.initiative);
             lowestPlayerInit = Math.min(lowestPlayerInit, combatant.initiative);
         }
@@ -131,7 +107,7 @@ function getMinMaxPlayerInitiative(combat: Combat): MinMaxInitiative {
 }
 
 // Applies initiative handicap to a particular token, intended to be applied to players.
-async function applyInitiativeHandicap(encounter : Combat) {
+async function applyInitiativeHandicap(encounter: Combat) {
     // for every player combatant that has rolled initiative (indicated by their id being present in ids), handicap their initiative.
     for (const combatant of encounter.combatants) {
         if (combatant.hasPlayerOwner) {
@@ -139,18 +115,16 @@ async function applyInitiativeHandicap(encounter : Combat) {
             initModifier = initModifier.startsWith('+') ? initModifier.split('+')[1] : initModifier;
 
             if (Number(initModifier)) {
-                // Will re-enable if I ever get pf2e types working
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
                 await encounter.setInitiative(combatant.id, combatant.initiative + Number(initModifier));
+            } else {
+                // TODO: throw error
             }
         }
     }
 }
 
 async function sortIntoBlockInitiative() {
-    console.log("sortIntoBlocks button clicked");
-    const encounter = game.combat;
+    const encounter: Combat = game.combat;
     await applyInitiativeHandicap(encounter)
 
     // After handicap is applied, get min and max player initiative
@@ -168,28 +142,26 @@ async function sortIntoBlockInitiative() {
 }
 
 function createSortIntoBlocksButton() {
-	const btnTitle : string = game.i18n.localize("BLOCKINITIATIVE.SortIntoBlocksButton");
-
+    //set title based on whether the user is player or GM
+    const btnTitle: string = game.i18n.localize("BLOCKINITIATIVE.SortIntoBlocksButton");
     const sortIntoBlocksButton = $(`<a class="combat-control mg-block-initiative sort-into-blocks" title="${btnTitle}"><i class="fas fa-arrow-down"></i></a>`);
-
     const encounterTitle = $("#combat-round").find(`.encounter-title`);
-
     const sortIntoBlocksButtonAlreadyPresent = $("#combat-round").find(`.mg-block-initiative .sort-into-blocks`).length > 0;
 
     // Add the button to the sidebar if it doesn't already exist
-	if (!sortIntoBlocksButtonAlreadyPresent) {
-		encounterTitle.before(sortIntoBlocksButton);
-		jQuery(".sort-into-blocks").on("click", sortIntoBlocksOnClick);
-	}
+    if (!sortIntoBlocksButtonAlreadyPresent) {
+        encounterTitle.before(sortIntoBlocksButton);
+        jQuery(".sort-into-blocks").on("click", sortIntoBlocksOnClick);
+    }
 
     /**
-	 * Ready check button listener
-	 * @param event the button click event
-	 */
-	function sortIntoBlocksOnClick (event: JQuery.ClickEvent) {
-		event.preventDefault();
-		void sortIntoBlockInitiative();
-	}
+     * Ready check button listener
+     * @param event the button click event
+     */
+    function sortIntoBlocksOnClick(event: JQuery.ClickEvent) {
+        event.preventDefault();
+        void sortIntoBlockInitiative();
+    }
 }
 
 function createReactionButtons() {
@@ -202,10 +174,4 @@ function createReactionButtons() {
 class MinMaxInitiative {
     playerInitMax: number
     playerInitMin: number
-}
-
-class RollObjectOptions {
-    formula: string | null
-    updateTurn = true
-    messageOptions: object
 }
