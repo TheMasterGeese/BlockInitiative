@@ -138,10 +138,9 @@ async function applyInitiativeHandicap(encounter : Combat) {
             initModifier = initModifier.startsWith('+') ? initModifier.split('+')[1] : initModifier;
 
             if (Number(initModifier)) {
-                // Will re-enable if I ever get pf2e types working
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
                 await encounter.setInitiative(combatant.id, combatant.initiative + Number(initModifier));
+            } else {
+                // TODO: throw error
             }
         }
     }
