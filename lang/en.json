@@ -3,5 +3,6 @@
   "BLOCKINITIATIVE.SettingsInitiativeHandicapHint" : "Block Initiative inherently puts enemies at a disadvantage. To offset this, players may be given a modifier to their initiative rolls (The recommended value is -3).",
 
   "BLOCKINITIATIVE.SortIntoBlocksButton" : "Sort combatants into blocks",
-  "BLOCKINITIATIVE.ReactionButton" : "Use a reaction"
+  "BLOCKINITIATIVE.ReactionButton" : "Use a reaction",
+  "BLOCKINITIATIVE.HasReacted": " has reacted."
 }

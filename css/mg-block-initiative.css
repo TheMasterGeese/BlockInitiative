@@ -1,3 +1,7 @@
 .mg-block-initiative .sort-into-blocks {
     
 }
+
+.mg-block-initiative .reaction {
+    color: var(--color-text-light-1);
+}

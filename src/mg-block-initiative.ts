@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -14,7 +15,26 @@ Hooks.once("init", function () {
     });
 });
 
-Hooks.on("renderEncounterTrackerPF2e", function (app: Application, html: JQuery, data: object) {
+Hooks.once("ready", () => {
+    // TODO: Edit the setting on mg-ready-check that enables all players to initiate ready checks. Enable it, and add a warning to the setting hint
+    // noting that if that setting is disabled, block-initiative may not send notifications properly if a GM isn't logged on.
+    if (socket) {
+		// create the socket handler
+		socket.on('module.mg-block-initiative', (combatantId : string) => {
+			if (game.userId === game.settings.get("mg-living-world-core", "GMProxy")) {
+                const combatant = game.combat.combatants.filter(c => c.id === combatantId)[0];
+                const reactionMessage = combatant.name + game.i18n.localize("BLOCKINITIATIVE.HasReacted");
+                let usersToMessage = getUsersInCombat();
+                // We don't need to include ourself in this ready check
+                usersToMessage = usersToMessage.filter(u => !u.isGM && !combatant.testUserPermission(u, "OWNER"));
+                    
+                Hooks.callAll("initReadyCheck", reactionMessage, usersToMessage);
+            }
+		});
+	}
+});
+
+Hooks.on("renderCombatTracker", function (app: Application, html: JQuery, data: object) {
     // render changes to the encounter tracker
     // Implement combat groups in a similar manner to how they are implemented in the combat groups mod.
     // Add the Combat phase UI element
@@ -166,12 +186,65 @@ function createSortIntoBlocksButton() {
 
 function createReactionButtons() {
     const currentUser = game.user;
+    const currentCombatants = game.combat.data.combatants;
+    const ownedCombatants : Combatant[] = currentUser.isGM ?
+        currentCombatants.filter(combatant => combatant.isNPC) :
+        currentCombatants.filter(combatant => combatant.canUserModify(currentUser, "update"));
+    ownedCombatants.forEach(combatant => {
+        createReactionButton(combatant);
+    })
+}
+
+function createReactionButton(combatant : Combatant) {
     const btnTitle : string = game.i18n.localize("BLOCKINITIATIVE.ReactionButton");
 
-    const reactionButton = $(`<a class="combatant-control mg-block-initiative reactionButton" title="${btnTitle}"><i src="systems/pf2e/icons/actions/Reaction.webp"></i></a>`);
+    const reactionButton = $(`<a class="combatant-control mg-block-initiative reaction" style="color: var(--color-text-light-1)" title="${btnTitle}"><span class="activity-icon">R</span></a>`);
+    const combatantRow = $("#combat-tracker").find(`[data-combatant-id=${combatant.id}]`);
+    const tokenEffects = combatantRow.find(`.token-effects`);
+    const reactionButtonAlreadyPresent = combatantRow.find(`.token-effects > .combatant-control, .mg-block-initiative, .reaction`).length > 0;
 
+    // Add the button to the sidebar if it doesn't already exist
+    if (!reactionButtonAlreadyPresent) {
+        reactionButton.on("click", function(event: JQuery.ClickEvent) {
+            event.preventDefault();
+    
+            const combatantId = $(this).parent().parent().parent().attr('data-combatant-id')
+             
+            if (socket) {
+                socket.emit('module.mg-block-initiative', combatantId);
+            }
+        });
+        tokenEffects.before(reactionButton);
+    }
 }
+
+/**
+ * Gets an array of users that have a token in the current scene.
+ * @returns The array of users
+ */
+ function getUsersInCombat() : User[] {
+	const usersInCombat : User[] = [];
+    const combatants = game.combat.combatants;
+	game.users.contents.forEach((user : User) => {
+		combatants.forEach((combatant : Combatant) => {
+			// permissions object that maps user ids to permission enums
+			const tokenPermissions = combatant.actor.data.permission;
+			
+			// if the user owns this token, then they are in the scene.
+			if (tokenPermissions[user.id] === 3 && !usersInCombat.includes(user)) {
+				usersInCombat.push(user);
+			}
+		});
+	});
+	return usersInCombat;
+}
+
 class MinMaxInitiative {
     playerInitMax: number
     playerInitMin: number
+}
+
+class ReactionData {
+    message: string
+    users: User[]
 }
