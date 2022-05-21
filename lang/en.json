@@ -4,5 +4,10 @@
 
   "BLOCKINITIATIVE.SortIntoBlocksButton" : "Sort combatants into blocks",
   "BLOCKINITIATIVE.ReactionButton" : "Use a reaction",
-  "BLOCKINITIATIVE.HasReacted": " has reacted."
+  "BLOCKINITIATIVE.HasReacted" : " has reacted.",
+
+  "BLOCKINITIAITVE.EnemiesAct" : "Enemies \n Act",
+  "BLOCKINITIAITVE.PlayersReact" : "Players \n React",
+  "BLOCKINITIAITVE.PlayersAct" : "Players \n Act",
+  "BLOCKINITIAITVE.EnemiesReact" : "Enemies \n React"
 }

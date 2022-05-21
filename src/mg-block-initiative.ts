@@ -37,10 +37,12 @@ Hooks.once("ready", () => {
 Hooks.on("renderCombatTracker", function (app: Application, html: JQuery, data: object) {
     // render changes to the encounter tracker
     // Implement combat groups in a similar manner to how they are implemented in the combat groups mod.
+
     // Add the Combat phase UI element
     // Is displayed above all the combatants, but below the row containing the round counter, button to roll initiative, reset initiative, etc.
     // consists of 4 sections, displayed horizontally in this order: Enemies Act, Players React, Players Act, Enemies React
     // The Current phase is displayed differently than the Others
+    createPhaseTracker();    
 
     // Add "Sort Into Blocks" button
     if (game.user.role === 4) { // Render for GM
@@ -95,6 +97,47 @@ Hooks.on("pf2e.startTurn", async function (_combatant: Combatant, encounter: Com
     }
 });
 
+/**
+ * Creates the phase tracker UI element in the Combat Manager.
+ */
+function createPhaseTracker() {
+    const phaseTracker = document.createElement("nav");
+    document.querySelector("#combat-tracker").before(phaseTracker);
+    phaseTracker.id = "mg-phase-tracker"
+    phaseTracker.classList.add("directory-header");
+
+    const phaseTrackerButtons = document.createElement("nav");
+    document.querySelector("#mg-phase-tracker").append(phaseTrackerButtons);
+    phaseTrackerButtons.classList.add("flexrow", "mg-phase-buttons");
+
+    createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesAct") as string);
+    createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersReact") as string);
+    createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersAct") as string);
+    createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesRect") as string);
+
+    /**
+     * Helper function to create each of the block initiaitve phases
+     * @param side The side that acts during this phase, either enemies or players.
+     * @param phaseName The text to display as a label for this phase.
+     */
+    function createPhase(side : COMBATANT_SIDE, phaseName : string) {
+        const phase = document.createElement("div");
+        document.querySelector(".mg-phase-buttons").append(phase);
+        phase.classList.add(side, "mg-phase-button");
+        phase.innerText = phaseName;
+    }
+}
+
+/**
+ * Represents the two "sides" in combat.
+ * 
+ * "players" are all combatants controlled by PCs.
+ * "enemies" are all other combatants, even if they are actually allies of the PCs/fighting on their behalf.
+ */
+enum COMBATANT_SIDE {
+    ENEMIES = "enemies",
+    PLAYERS = "players"
+}
 /**
  * Changes the current combat phase,
  */
