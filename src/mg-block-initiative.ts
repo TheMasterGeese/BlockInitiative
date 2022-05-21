@@ -113,7 +113,7 @@ function createPhaseTracker() {
     createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesAct") as string);
     createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersReact") as string);
     createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersAct") as string);
-    createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesRect") as string);
+    createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesReact") as string);
 
     /**
      * Helper function to create each of the block initiaitve phases
