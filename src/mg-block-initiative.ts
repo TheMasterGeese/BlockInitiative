@@ -37,10 +37,12 @@ Hooks.once("ready", () => {
 Hooks.on("renderCombatTracker", function (app: Application, html: JQuery, data: object) {
     // render changes to the encounter tracker
     // Implement combat groups in a similar manner to how they are implemented in the combat groups mod.
+
     // Add the Combat phase UI element
     // Is displayed above all the combatants, but below the row containing the round counter, button to roll initiative, reset initiative, etc.
     // consists of 4 sections, displayed horizontally in this order: Enemies Act, Players React, Players Act, Enemies React
     // The Current phase is displayed differently than the Others
+    createPhaseTracker();    
 
     // Add "Sort Into Blocks" button
     if (game.user.role === 4) { // Render for GM
@@ -95,6 +97,64 @@ Hooks.on("pf2e.startTurn", async function (_combatant: Combatant, encounter: Com
     }
 });
 
+function createPhaseTracker() {
+
+    const phaseTracker = document.createElement("nav");
+    document.querySelector("#combat-tracker").before(phaseTracker);
+    phaseTracker.id = "mg-phase-tracker"
+    phaseTracker.classList.add("phase-tracker");
+    phaseTracker.classList.add("directory-header");
+    phaseTracker.classList.add("mg-block-initiative");
+
+    const phaseTrackerButtons = document.createElement("nav");
+    document.querySelector(".phase-tracker").append(phaseTrackerButtons);
+    phaseTrackerButtons.classList.add("flexrow");
+    phaseTrackerButtons.classList.add("phase-buttons");
+    phaseTrackerButtons.classList.add("encounter");
+
+    const enemiesActPhase = document.createElement("div");
+    document.querySelector(".phase-buttons").append(enemiesActPhase);
+    enemiesActPhase.classList.add("phase-button");
+    enemiesActPhase.classList.add("enemies");
+    enemiesActPhase.classList.add("inactive");
+    enemiesActPhase.innerText = "Enemies \n Act";
+
+    const playersReactPhase = document.createElement("div");
+    document.querySelector(".phase-buttons").append(playersReactPhase);
+    playersReactPhase.classList.add("phase-button")
+    playersReactPhase.classList.add("players");
+    playersReactPhase.classList.add("active");
+    playersReactPhase.innerText = "Players \n React";
+
+    const playersActPhase = document.createElement("div");
+    document.querySelector(".phase-buttons").append(playersActPhase);
+    playersActPhase.classList.add("phase-button")
+    playersActPhase.classList.add("players");
+    playersActPhase.classList.add("inactive");
+    playersActPhase.innerText = "Players \n Act";
+
+    const enemiesReactPhase = document.createElement("div");
+    document.querySelector(".phase-buttons").append(enemiesReactPhase);
+    enemiesReactPhase.classList.add("phase-button")
+    enemiesReactPhase.classList.add("enemies");
+    enemiesReactPhase.classList.add("inactive");
+    enemiesReactPhase.innerText = "Enemies \n React";
+    
+    /*
+    const phaseTracker = document.createElement("ol");
+    phaseTracker.id = "mg-block-initiative-phase-tracker";
+    phaseTracker.classList.add("flexrow");
+    html.before(phaseTracker);
+
+    
+
+    html.find("#mg-block-initiative-phase-tracker")
+        .add(enemiesActPhase)
+        .add(playersReactPhase)
+        .add(playersActPhase)
+        .add(enemiesReactPhase);
+    */
+}
 /**
  * Changes the current combat phase,
  */

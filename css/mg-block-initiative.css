@@ -5,3 +5,62 @@
 .mg-block-initiative .reaction {
     color: var(--color-text-light-1);
 }
+
+/* Controls the app itself */
+#mg-phase-tracker .combat-tracker {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    max-height: 50px;
+    /* border: 1px solid var(--color-border-dark, #000); */
+    z-index: 100!important;
+    pointer-events: all;
+    height: unset!important;
+  }
+
+#mg-phase-tracker .phase-buttons {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    /* border: 1px solid var(--color-border-dark, #000); */
+    z-index: 100!important;
+    pointer-events: all;
+    height: 56px;
+}
+
+/* Style the phase "buttons" */
+#mg-phase-tracker .phase-button {
+    display: block;
+    margin: 3px 0;
+    text-align: center;
+    border: 2px solid var(--color-border-dark, #000);
+    color: var(--color-text-light-0, white);
+    flex: 0 0 25%;
+    line-height: 24px;
+    border-radius: 5px;
+}
+
+/* Fade out inactive phases */
+#mg-phase-tracker .inactive {
+    opacity: 0.5;
+}
+
+/* Style the first one in the row so that the corners are rounded correctly and so there is a margin on the left */
+#mg-phase-tracker .phase-buttons:first-child {
+    margin-left: 3px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+  
+/* Style the last one in the row so that the corners are rounded correctly and so there is a margin on the right */
+#mg-phase-tracker .phase-buttons:last-child {
+    margin-right: 3px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+#mg-phase-tracker .enemies {
+    background-color: rgb(200, 36, 36);
+}
+
+#mg-phase-tracker .players {
+    background-color: rgb(36, 36, 200);
+}
