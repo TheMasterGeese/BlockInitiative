@@ -97,63 +97,46 @@ Hooks.on("pf2e.startTurn", async function (_combatant: Combatant, encounter: Com
     }
 });
 
+/**
+ * Creates the phase tracker UI element in the Combat Manager.
+ */
 function createPhaseTracker() {
-
     const phaseTracker = document.createElement("nav");
     document.querySelector("#combat-tracker").before(phaseTracker);
     phaseTracker.id = "mg-phase-tracker"
-    phaseTracker.classList.add("phase-tracker");
     phaseTracker.classList.add("directory-header");
-    phaseTracker.classList.add("mg-block-initiative");
 
     const phaseTrackerButtons = document.createElement("nav");
-    document.querySelector(".phase-tracker").append(phaseTrackerButtons);
-    phaseTrackerButtons.classList.add("flexrow");
-    phaseTrackerButtons.classList.add("phase-buttons");
-    phaseTrackerButtons.classList.add("encounter");
+    document.querySelector("#mg-phase-tracker").append(phaseTrackerButtons);
+    phaseTrackerButtons.classList.add("flexrow", "mg-phase-buttons");
 
-    const enemiesActPhase = document.createElement("div");
-    document.querySelector(".phase-buttons").append(enemiesActPhase);
-    enemiesActPhase.classList.add("phase-button");
-    enemiesActPhase.classList.add("enemies");
-    enemiesActPhase.classList.add("inactive");
-    enemiesActPhase.innerText = "Enemies \n Act";
+    createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesAct") as string);
+    createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersReact") as string);
+    createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersAct") as string);
+    createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesRect") as string);
 
-    const playersReactPhase = document.createElement("div");
-    document.querySelector(".phase-buttons").append(playersReactPhase);
-    playersReactPhase.classList.add("phase-button")
-    playersReactPhase.classList.add("players");
-    playersReactPhase.classList.add("active");
-    playersReactPhase.innerText = "Players \n React";
+    /**
+     * Helper function to create each of the block initiaitve phases
+     * @param side The side that acts during this phase, either enemies or players.
+     * @param phaseName The text to display as a label for this phase.
+     */
+    function createPhase(side : COMBATANT_SIDE, phaseName : string) {
+        const phase = document.createElement("div");
+        document.querySelector(".mg-phase-buttons").append(phase);
+        phase.classList.add(side, "mg-phase-button");
+        phase.innerText = phaseName;
+    }
+}
 
-    const playersActPhase = document.createElement("div");
-    document.querySelector(".phase-buttons").append(playersActPhase);
-    playersActPhase.classList.add("phase-button")
-    playersActPhase.classList.add("players");
-    playersActPhase.classList.add("inactive");
-    playersActPhase.innerText = "Players \n Act";
-
-    const enemiesReactPhase = document.createElement("div");
-    document.querySelector(".phase-buttons").append(enemiesReactPhase);
-    enemiesReactPhase.classList.add("phase-button")
-    enemiesReactPhase.classList.add("enemies");
-    enemiesReactPhase.classList.add("inactive");
-    enemiesReactPhase.innerText = "Enemies \n React";
-    
-    /*
-    const phaseTracker = document.createElement("ol");
-    phaseTracker.id = "mg-block-initiative-phase-tracker";
-    phaseTracker.classList.add("flexrow");
-    html.before(phaseTracker);
-
-    
-
-    html.find("#mg-block-initiative-phase-tracker")
-        .add(enemiesActPhase)
-        .add(playersReactPhase)
-        .add(playersActPhase)
-        .add(enemiesReactPhase);
-    */
+/**
+ * Represents the two "sides" in combat.
+ * 
+ * "players" are all combatants controlled by PCs.
+ * "enemies" are all other combatants, even if they are actually allies of the PCs/fighting on their behalf.
+ */
+enum COMBATANT_SIDE {
+    ENEMIES = "enemies",
+    PLAYERS = "players"
 }
 /**
  * Changes the current combat phase,
