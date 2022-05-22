@@ -40,3 +40,15 @@
 #mg-phase-tracker .players {
     background-color: rgb(36, 36, 200);
 }
+
+.mg-labelBox {
+    text-shadow: 1px 1px 4px var(--color-shadow-dark, #000);
+    cursor: pointer;
+    line-height: calc(var(--sidebar-item-height, 48px) / 2);
+    padding: 0 6px;
+    background: rgba(0, 0, 0, 0.5);
+    border-top: 1px solid var(--color-border-dark, #000);
+    border-bottom: 1px solid var(--color-border-dark, #000);
+    margin: auto 0;
+    flex-grow: 1;
+}

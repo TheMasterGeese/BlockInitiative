@@ -35,8 +35,13 @@ Hooks.once("ready", () => {
 });
 
 Hooks.on("renderCombatTracker", function (app: Application, html: JQuery, data: object) {
+
+    // Exit if there is no combat
+    if (!game.combat) return;
+
     // render changes to the encounter tracker
     // Implement combat groups in a similar manner to how they are implemented in the combat groups mod.
+    createCombatantGroups();
 
     // Add the Combat phase UI element
     // Is displayed above all the combatants, but below the row containing the round counter, button to roll initiative, reset initiative, etc.
@@ -96,6 +101,111 @@ Hooks.on("pf2e.startTurn", async function (_combatant: Combatant, encounter: Com
         encounter = await encounter.unsetFlag('mg-ready-check', 'overrideNextTurn');
     }
 });
+
+function createCombatantGroups() {
+    // Remove any existing groups
+    document.querySelectorAll("mg-combat-group li.combatant").forEach(combatant => document.querySelector("#combat-tracker")?.append(combatant));
+    document.querySelectorAll("mg-combat-group").forEach(toggle => toggle.remove());
+
+    // If there's any enemies that beat ALL the PCs in initiative
+    // Create an enemies group that goes before PCs.
+
+    // Create Players Group
+    // Create Enemies Group
+
+    // Get groups
+    const groups = addUsersToGroups();
+
+     // Go through each of the groups
+    groups?.forEach((group, index) => {
+        /** Toggle element */
+        const toggle = document.createElement("details"); 
+        toggle.classList.add("folder");
+        toggle.open = true;
+
+        /** A subdirectory in the toggle which contains Combatants */
+        const subdirectory = document.createElement("ol"); 
+        subdirectory.classList.add("subdirectory");
+        toggle.append(subdirectory);
+
+        // Go through each of the combatants
+        group.forEach((combatant, i, arr) => {
+            /** The DOM element of this combatant */
+            const element = document.querySelector(`[data-combatant-id="${combatant.id}"]`);
+
+            // If it's the last entry
+            if (i === arr.length - 1) {
+                // Add the toggle to the end
+                document.querySelector("#combat-tracker").prepend(toggle);
+
+                // Create a label for the toggle
+                const labelBox = document.createElement("summary");
+                labelBox.classList.add("mg-labelBox");
+                labelBox.classList.add("folder-header");
+                labelBox.innerText = i === 1 ? "Players" : "Enemies";
+                // Insert the label box
+                toggle.prepend(labelBox);
+
+            }
+
+            // Move the element into the subdirectory
+            subdirectory.append(element);
+        });
+    });
+}
+
+function addUsersToGroups() : Combatant[][] {
+
+    const combatantList = game.combat.combatants.contents;
+
+    const findFastEnemies = (combatant : Combatant) : boolean => {
+        const playerMaxInit = getMinMaxPlayerInitiative(game.combat).playerInitMax
+        return combatant.isNPC && combatant.initiative && combatant.initiative >= playerMaxInit
+    }
+    const fastEnemiesGroup : Combatant[] = buildCombatantGroup(combatantList, findFastEnemies)
+
+    const findPlayers = (combatant : Combatant) : boolean => {
+        return !combatant.isNPC;
+    }
+    const playersGroup : Combatant[] = buildCombatantGroup(combatantList, findPlayers)
+    const findEnemies = (combatant : Combatant) : boolean => {
+        const playerMaxInit = getMinMaxPlayerInitiative(game.combat).playerInitMax
+        return combatant.isNPC && combatant.initiative && combatant.initiative < playerMaxInit 
+    }
+    const enemiesGroup : Combatant[] = buildCombatantGroup(combatantList, findEnemies)
+
+    let combatantGroups : Combatant[][] = [fastEnemiesGroup, playersGroup, enemiesGroup];
+
+    combatantGroups = combatantGroups
+		.map(group => group.sort(sortCombatants)) // Sort each group
+		.sort((a, b) => sortCombatants(b[0], a[0])); // Sort by the first combatant
+
+    return combatantGroups;
+}
+
+function buildCombatantGroup(combatantList : Combatant[], predicate : (combatant : Combatant) => boolean) : Combatant[] {
+    const combatantsInGroup : Combatant[] = [];
+    combatantList.forEach(combatant => {
+        if (predicate(combatant)) {
+            combatantsInGroup.push(combatant);
+        }
+    })
+    return combatantsInGroup;
+}
+
+function sortCombatants(a : Combatant, b : Combatant) : number {
+    if (a && b) {
+        if (a.initiative && b.initiative) {
+            return a.initiative < b.initiative ? 1 : -1;
+        } else if (a.id && b.id) {
+            return a.id < b.id ? 1 : -1
+        } else {
+            return -1
+        }
+    } else {
+        return -1
+    }
+}
 
 /**
  * Creates the phase tracker UI element in the Combat Manager.
