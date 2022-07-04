@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -19,19 +21,23 @@ Hooks.once("ready", () => {
     // TODO: Edit the setting on mg-ready-check that enables all players to initiate ready checks. Enable it, and add a warning to the setting hint
     // noting that if that setting is disabled, block-initiative may not send notifications properly if a GM isn't logged on.
     if (socket) {
-		// create the socket handler
-		socket.on('module.mg-block-initiative', (combatantId : string) => {
-			if (game.userId === game.settings.get("mg-living-world-core", "GMProxy")) {
+        // create the socket handler
+        socket.on('module.mg-block-initiative', (combatantId: string) => {
+            if (game.userId === game.settings.get("mg-living-world-core", "GMProxy")) {
                 const combatant = game.combat.combatants.filter(c => c.id === combatantId)[0];
                 const reactionMessage = combatant.name + game.i18n.localize("BLOCKINITIATIVE.HasReacted");
                 let usersToMessage = getUsersInCombat();
                 // We don't need to include ourself in this ready check
                 usersToMessage = usersToMessage.filter(u => !u.isGM && !combatant.testUserPermission(u, "OWNER"));
-                    
+
                 Hooks.callAll("initReadyCheck", reactionMessage, usersToMessage);
             }
-		});
-	}
+        });
+    }
+});
+
+Hooks.on("createCombat", async function(combat : Combat, _options: any, _userId: string ) {
+    await combat.setFlag('mg-block-initiative', 'currentPhase', game.i18n.localize("BLOCKINITIATIVE.EnemiesAct"));
 });
 
 Hooks.on("renderCombatTracker", function (app: Application, html: JQuery, data: object) {
@@ -47,22 +53,21 @@ Hooks.on("renderCombatTracker", function (app: Application, html: JQuery, data: 
     // Is displayed above all the combatants, but below the row containing the round counter, button to roll initiative, reset initiative, etc.
     // consists of 4 sections, displayed horizontally in this order: Enemies Act, Players React, Players Act, Enemies React
     // The Current phase is displayed differently than the Others
-    createPhaseTracker();    
+    createPhaseTracker();
 
     // Add "Sort Into Blocks" button
     if (game.user.role === 4) { // Render for GM
         createSortIntoBlocksButton();
-        
     }
-    
+
     // Add "Reaction" buttons
     createReactionButtons();
-    
-    
-    
-    
-        // For players, only render the reaction button for combatants they control
-        // For GM, only render the reaction button for NPCs.
+
+    overrideCombatControls();
+
+
+    // For players, only render the reaction button for combatants they control
+    // For GM, only render the reaction button for NPCs.
 
     // For players, this affects either the currently selected token or defaults to their character
     // For GMs, this affects the currently selected token
@@ -102,6 +107,14 @@ Hooks.on("pf2e.startTurn", async function (_combatant: Combatant, encounter: Com
     }
 });
 
+function setEncounterStartPhase() {
+    const handler = async () => {
+        await game.combat.setFlag('mg-block-initiative', 'currentPhase', game.i18n.localize("BLOCKINITIATIVE.EnemiesAct"));
+    };
+
+    void handler();
+}
+
 function createCombatantGroups() {
     // Remove any existing groups
     document.querySelectorAll("mg-combat-group li.combatant").forEach(combatant => document.querySelector("#combat-tracker")?.append(combatant));
@@ -116,15 +129,15 @@ function createCombatantGroups() {
     // Get groups
     const groups = addUsersToGroups();
 
-     // Go through each of the groups
+    // Go through each of the groups
     groups?.forEach((group, index) => {
         /** Toggle element */
-        const toggle = document.createElement("details"); 
+        const toggle = document.createElement("details");
         toggle.classList.add("folder");
         toggle.open = true;
 
         /** A subdirectory in the toggle which contains Combatants */
-        const subdirectory = document.createElement("ol"); 
+        const subdirectory = document.createElement("ol");
         subdirectory.classList.add("subdirectory");
         toggle.append(subdirectory);
 
@@ -154,37 +167,37 @@ function createCombatantGroups() {
     });
 }
 
-function addUsersToGroups() : Combatant[][] {
+function addUsersToGroups(): Combatant[][] {
 
     const combatantList = game.combat.combatants.contents;
 
-    const findFastEnemies = (combatant : Combatant) : boolean => {
+    const findFastEnemies = (combatant: Combatant): boolean => {
         const playerMaxInit = getMinMaxPlayerInitiative(game.combat).playerInitMax
         return combatant.isNPC && combatant.initiative && combatant.initiative >= playerMaxInit
     }
-    const fastEnemiesGroup : Combatant[] = buildCombatantGroup(combatantList, findFastEnemies)
+    const fastEnemiesGroup: Combatant[] = buildCombatantGroup(combatantList, findFastEnemies)
 
-    const findPlayers = (combatant : Combatant) : boolean => {
+    const findPlayers = (combatant: Combatant): boolean => {
         return !combatant.isNPC;
     }
-    const playersGroup : Combatant[] = buildCombatantGroup(combatantList, findPlayers)
-    const findEnemies = (combatant : Combatant) : boolean => {
+    const playersGroup: Combatant[] = buildCombatantGroup(combatantList, findPlayers)
+    const findEnemies = (combatant: Combatant): boolean => {
         const playerMaxInit = getMinMaxPlayerInitiative(game.combat).playerInitMax
-        return combatant.isNPC && combatant.initiative && combatant.initiative < playerMaxInit 
+        return combatant.isNPC && combatant.initiative && combatant.initiative < playerMaxInit
     }
-    const enemiesGroup : Combatant[] = buildCombatantGroup(combatantList, findEnemies)
+    const enemiesGroup: Combatant[] = buildCombatantGroup(combatantList, findEnemies)
 
-    let combatantGroups : Combatant[][] = [fastEnemiesGroup, playersGroup, enemiesGroup];
+    let combatantGroups: Combatant[][] = [fastEnemiesGroup, playersGroup, enemiesGroup];
 
     combatantGroups = combatantGroups
-		.map(group => group.sort(sortCombatants)) // Sort each group
-		.sort((a, b) => sortCombatants(b[0], a[0])); // Sort by the first combatant
+        .map(group => group.sort(sortCombatants)) // Sort each group
+        .sort((a, b) => sortCombatants(b[0], a[0])); // Sort by the first combatant
 
     return combatantGroups;
 }
 
-function buildCombatantGroup(combatantList : Combatant[], predicate : (combatant : Combatant) => boolean) : Combatant[] {
-    const combatantsInGroup : Combatant[] = [];
+function buildCombatantGroup(combatantList: Combatant[], predicate: (combatant: Combatant) => boolean): Combatant[] {
+    const combatantsInGroup: Combatant[] = [];
     combatantList.forEach(combatant => {
         if (predicate(combatant)) {
             combatantsInGroup.push(combatant);
@@ -193,7 +206,7 @@ function buildCombatantGroup(combatantList : Combatant[], predicate : (combatant
     return combatantsInGroup;
 }
 
-function sortCombatants(a : Combatant, b : Combatant) : number {
+function sortCombatants(a: Combatant, b: Combatant): number {
     if (a && b) {
         if (a.initiative && b.initiative) {
             return a.initiative < b.initiative ? 1 : -1;
@@ -211,6 +224,9 @@ function sortCombatants(a : Combatant, b : Combatant) : number {
  * Creates the phase tracker UI element in the Combat Manager.
  */
 function createPhaseTracker() {
+
+    const currentPhase = game.combat.getFlag('mg-block-initiative', 'currentPhase');
+
     const phaseTracker = document.createElement("nav");
     document.querySelector("#combat-tracker").before(phaseTracker);
     phaseTracker.id = "mg-phase-tracker"
@@ -230,11 +246,73 @@ function createPhaseTracker() {
      * @param side The side that acts during this phase, either enemies or players.
      * @param phaseName The text to display as a label for this phase.
      */
-    function createPhase(side : COMBATANT_SIDE, phaseName : string) {
+    function createPhase(side: COMBATANT_SIDE, phaseName: string) {
         const phase = document.createElement("div");
         document.querySelector(".mg-phase-buttons").append(phase);
         phase.classList.add(side, "mg-phase-button");
+        if (phaseName != currentPhase) {
+            phase.classList.add("inactive","mg-phase-button");
+        }
         phase.innerText = phaseName;
+    }
+}
+
+enum COMBATANT_SIDE {
+    ENEMIES = "enemies",
+    PLAYERS = "players"
+}
+
+function overrideCombatControls() {
+    const combatControls = document.querySelector("#combat-controls");
+
+    const nextTurnButton = combatControls.querySelector(`a[data-control="nextTurn"]`);
+    jQuery(nextTurnButton).off('click').on('click', () => {
+        const nextPhase = getNextPhase();
+        void changePhase(nextPhase);
+    });
+    const previousTurnButton = combatControls.querySelector(`a[data-control="previousTurn"]`);
+    jQuery(previousTurnButton).off('click').on('click', () => {
+        const previousPhase = getPreviousPhase();
+        void changePhase(previousPhase);
+    });
+
+
+}
+
+function getNextPhase(): string {
+    const currentPhase = document.querySelector('#mg-phase-tracker > nav > div:not(.inactive)').textContent;
+    let nextPhase;
+    switch (currentPhase) {
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesAct").replace('\n', ''):
+            nextPhase = game.i18n.localize("BLOCKINITIATIVE.PlayersReact").replace('\n', '');
+            return nextPhase;
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersReact").replace('\n', ''):
+            nextPhase = game.i18n.localize("BLOCKINITIATIVE.PlayersAct").replace('\n', '');
+            return nextPhase;
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersAct").replace('\n', ''):
+            nextPhase = game.i18n.localize("BLOCKINITIATIVE.EnemiesReact").replace('\n', '');
+            return nextPhase;
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesReact").replace('\n', ''):
+            nextPhase = game.i18n.localize("BLOCKINITIATIVE.EnemiesAct").replace('\n', '');
+            return nextPhase;
+        default:
+            return "";
+    }
+}
+
+function getPreviousPhase(): string {
+    const currentPhase = document.querySelector('#mg-phase-tracker > nav > div:not(.inactive)').textContent;
+    switch (currentPhase) {
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesAct").replace('\n', ''):
+            return game.i18n.localize("BLOCKINITIATIVE.EnemiesReact").replace('\n', '');
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersReact").replace('\n', ''):
+            return game.i18n.localize("BLOCKINITIATIVE.EnemiesAct").replace('\n', '');
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersAct").replace('\n', ''):
+            return game.i18n.localize("BLOCKINITIATIVE.PlayersReact").replace('\n', '');
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesReact").replace('\n', ''):
+            return game.i18n.localize("BLOCKINITIATIVE.PlayersAct").replace('\n', '');
+        default:
+            return "";
     }
 }
 
@@ -244,22 +322,72 @@ function createPhaseTracker() {
  * "players" are all combatants controlled by PCs.
  * "enemies" are all other combatants, even if they are actually allies of the PCs/fighting on their behalf.
  */
-enum COMBATANT_SIDE {
-    ENEMIES = "enemies",
-    PLAYERS = "players"
-}
+
 /**
  * Changes the current combat phase,
  */
-function changePhase() {
-    // If called with no parameters, changes to the next phase in sequence, otherwise it changes to the phase given as a parameter.
-    // The sequence goes: Enemies Act -> Players React -> Players Act -> Enemies React -> Enemies Act and so forth.
-    // When changing from Players React -> Players Act, trigger all end-of-turn effects on enemies, and all start-of-turn effects on players.
-    // When changing from Enemies React -> Enemies Act, trigger all end-of-turn effects on players, and all start-of-turn effects on enemies.
-    // During a particular combat round, start-of-turn and end-of-turn effects can only trigger once. This guards against instances where the GM
-    // moving to a phase out of order (such as to make corrections) will not trigger these effects multiple times.
-    // TODO: Implement a memento system to simulate Undo/Redo instead.
+async function changePhase(newPhase?: string, changeRound?: boolean) {
+
+    const playersReactButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(1)`);
+    const playersActButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(2)`);
+    const enemiesReactButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(3)`);
+    const enemiesActButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(4)`);
+
+    [playersReactButton, playersActButton, enemiesReactButton, enemiesActButton].forEach(button => {
+        if (newPhase === button.textContent) {
+            button.classList.remove('inactive');
+        } else {
+            button.classList.add('inactive');
+        }
+    })
+
+
+    switch (newPhase) {
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersReact"):
+            await game.combat.setFlag("mg-block-initiative", "currentPhase", game.i18n.localize("BLOCKINITIATIVE.PlayersReact")).then(() => {
+                changeToPlayersReact(changeRound);
+            });
+            break;
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersAct"):
+            await game.combat.setFlag("mg-block-initiative", "currentPhase", game.i18n.localize("BLOCKINITIATIVE.PlayersAct")).then(() => {
+                changeToPlayersAct(changeRound);
+            });
+            break;
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesReact"):
+            await game.combat.setFlag("mg-block-initiative", "currentPhase", game.i18n.localize("BLOCKINITIATIVE.EnemiesReact")).then(() => {
+                changeToEnemiesReact(changeRound);
+            });
+            break;
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesAct"):
+            await game.combat.setFlag("mg-block-initiative", "currentPhase", game.i18n.localize("BLOCKINITIATIVE.EnemiesAct")).then(() => {
+                changeToEnemiesAct(changeRound);
+            });
+            break;
+    }
 }
+
+function changeToPlayersReact(changeRound?: boolean) {
+    // TODO
+}
+
+function changeToPlayersAct(changeRound?: boolean) {
+    // TODO
+}
+function changeToEnemiesReact(changeRound?: boolean) {
+    // TODO
+}
+
+function changeToEnemiesAct(changeRound?: boolean) {
+    // TODO
+}
+// If called with no parameters, changes to the next phase in sequence, otherwise it changes to the phase given as a parameter.
+// The sequence goes: Enemies Act -> Players React -> Players Act -> Enemies React -> Enemies Act and so forth.
+// When changing from Players React -> Players Act, trigger all end-of-turn effects on enemies, and all start-of-turn effects on players.
+// When changing from Enemies React -> Enemies Act, trigger all end-of-turn effects on players, and all start-of-turn effects on enemies.
+// During a particular combat round, start-of-turn and end-of-turn effects can only trigger once. This guards against instances where the GM
+// moving to a phase out of order (such as to make corrections) will not trigger these effects multiple times.
+// TODO: Implement a memento system to simulate Undo/Redo instead.
+
 function getMinMaxPlayerInitiative(combat: Combat): MinMaxInitiative {
     let highestPlayerInit = -999999;
     let lowestPlayerInit = 999999;
@@ -340,7 +468,7 @@ function createSortIntoBlocksButton() {
 function createReactionButtons() {
     const currentUser = game.user;
     const currentCombatants = game.combat.data.combatants;
-    const ownedCombatants : Combatant[] = currentUser.isGM ?
+    const ownedCombatants: Combatant[] = currentUser.isGM ?
         currentCombatants.filter(combatant => combatant.isNPC) :
         currentCombatants.filter(combatant => combatant.canUserModify(currentUser, "update"));
     ownedCombatants.forEach(combatant => {
@@ -348,8 +476,8 @@ function createReactionButtons() {
     })
 }
 
-function createReactionButton(combatant : Combatant) {
-    const btnTitle : string = game.i18n.localize("BLOCKINITIATIVE.ReactionButton");
+function createReactionButton(combatant: Combatant) {
+    const btnTitle: string = game.i18n.localize("BLOCKINITIATIVE.ReactionButton");
 
     const reactionButton = $(`<a class="combatant-control mg-block-initiative reaction" style="color: var(--color-text-light-1)" title="${btnTitle}"><span class="activity-icon">R</span></a>`);
     const combatantRow = $("#combat-tracker").find(`[data-combatant-id=${combatant.id}]`);
@@ -358,11 +486,11 @@ function createReactionButton(combatant : Combatant) {
 
     // Add the button to the sidebar if it doesn't already exist
     if (!reactionButtonAlreadyPresent) {
-        reactionButton.on("click", function(event: JQuery.ClickEvent) {
+        reactionButton.on("click", function (event: JQuery.ClickEvent) {
             event.preventDefault();
-    
+
             const combatantId = $(this).parent().parent().parent().attr('data-combatant-id')
-             
+
             if (socket) {
                 socket.emit('module.mg-block-initiative', combatantId);
             }
@@ -375,21 +503,21 @@ function createReactionButton(combatant : Combatant) {
  * Gets an array of users that have a token in the current scene.
  * @returns The array of users
  */
- function getUsersInCombat() : User[] {
-	const usersInCombat : User[] = [];
+function getUsersInCombat(): User[] {
+    const usersInCombat: User[] = [];
     const combatants = game.combat.combatants;
-	game.users.contents.forEach((user : User) => {
-		combatants.forEach((combatant : Combatant) => {
-			// permissions object that maps user ids to permission enums
-			const tokenPermissions = combatant.actor.data.permission;
-			
-			// if the user owns this token, then they are in the scene.
-			if (tokenPermissions[user.id] === 3 && !usersInCombat.includes(user)) {
-				usersInCombat.push(user);
-			}
-		});
-	});
-	return usersInCombat;
+    game.users.contents.forEach((user: User) => {
+        combatants.forEach((combatant: Combatant) => {
+            // permissions object that maps user ids to permission enums
+            const tokenPermissions = combatant.actor.data.permission;
+
+            // if the user owns this token, then they are in the scene.
+            if (tokenPermissions[user.id] === 3 && !usersInCombat.includes(user)) {
+                usersInCombat.push(user);
+            }
+        });
+    });
+    return usersInCombat;
 }
 
 class MinMaxInitiative {
@@ -400,4 +528,11 @@ class MinMaxInitiative {
 class ReactionData {
     message: string
     users: User[]
+}
+
+enum CombatPhase {
+    ENEMIES_ACT,
+    PLAYERS_REACT,
+    PLAYERS_ACT,
+    ENEMIES_REACT
 }
