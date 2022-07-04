@@ -100,7 +100,7 @@ Hooks.on("pf2e.endTurn", async function (combatant: Combatant, encounter: Combat
 });
 
 // listens for flag to override the next turn.
-Hooks.on("pf2e.startTurn", async function (_combatant: Combatant, encounter: Combat) {
+Hooks.on("pf2e.startTurn", async function (combatant: Combatant, encounter: Combat) {
     if (encounter.getFlag('mg-ready-check', 'overrideNextTurn')) {
         encounter.data.turn = 0;
         encounter = await encounter.unsetFlag('mg-ready-check', 'overrideNextTurn');
@@ -368,6 +368,16 @@ function changeToPlayersReact(changeRound?: boolean) {
 }
 
 function changeToPlayersAct(changeRound?: boolean) {
+
+    game.combat.combatants.forEach((combatant: Combatant) => {
+        if (combatant.hasPlayerOwner) {
+            Hooks.call('pf2e.startTurn', combatant, game.combat);
+        } else {
+            Hooks.call('pf2e.endTurn', combatant, game.combat);
+        }
+    });
+    // Trigger enemy end of turn effects.
+    // Trigger all player start of turn effects.
     // TODO
 }
 function changeToEnemiesReact(changeRound?: boolean) {
@@ -375,6 +385,15 @@ function changeToEnemiesReact(changeRound?: boolean) {
 }
 
 function changeToEnemiesAct(changeRound?: boolean) {
+    game.combat.combatants.forEach((combatant: Combatant) => {
+        if (combatant.hasPlayerOwner) {
+            Hooks.call('pf2e.endTurn', combatant, game.combat);
+        } else {
+            Hooks.call('pf2e.startTurn', combatant, game.combat);
+        }
+    });
+    // Trigger player end of turn effects
+    // Trigger enemy start of turn effects
     // TODO
 }
 // If called with no parameters, changes to the next phase in sequence, otherwise it changes to the phase given as a parameter.
