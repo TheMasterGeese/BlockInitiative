@@ -275,8 +275,6 @@ function overrideCombatControls() {
         const previousPhase = getPreviousPhase();
         void changePhase(previousPhase);
     });
-
-
 }
 
 function getNextPhase(): string {
@@ -341,24 +339,23 @@ async function changePhase(newPhase?: string, changeRound?: boolean) {
         }
     })
 
-
     switch (newPhase) {
-        case game.i18n.localize("BLOCKINITIATIVE.PlayersReact"):
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersReact").replace('\n', ''):
             await game.combat.setFlag("mg-block-initiative", "currentPhase", game.i18n.localize("BLOCKINITIATIVE.PlayersReact")).then(() => {
                 changeToPlayersReact(changeRound);
             });
             break;
-        case game.i18n.localize("BLOCKINITIATIVE.PlayersAct"):
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersAct").replace('\n', ''):
             await game.combat.setFlag("mg-block-initiative", "currentPhase", game.i18n.localize("BLOCKINITIATIVE.PlayersAct")).then(() => {
                 changeToPlayersAct(changeRound);
             });
             break;
-        case game.i18n.localize("BLOCKINITIATIVE.EnemiesReact"):
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesReact").replace('\n', ''):
             await game.combat.setFlag("mg-block-initiative", "currentPhase", game.i18n.localize("BLOCKINITIATIVE.EnemiesReact")).then(() => {
                 changeToEnemiesReact(changeRound);
             });
             break;
-        case game.i18n.localize("BLOCKINITIATIVE.EnemiesAct"):
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesAct").replace('\n', ''):
             await game.combat.setFlag("mg-block-initiative", "currentPhase", game.i18n.localize("BLOCKINITIATIVE.EnemiesAct")).then(() => {
                 changeToEnemiesAct(changeRound);
             });
