@@ -22,21 +22,30 @@ Hooks.once("ready", () => {
     // noting that if that setting is disabled, block-initiative may not send notifications properly if a GM isn't logged on.
     if (socket) {
         // create the socket handler
-        socket.on('module.mg-block-initiative', (combatantId: string) => {
-            if (game.userId === game.settings.get("mg-living-world-core", "GMProxy")) {
-                const combatant = game.combat.combatants.filter(c => c.id === combatantId)[0];
-                const reactionMessage = combatant.name + game.i18n.localize("BLOCKINITIATIVE.HasReacted");
-                let usersToMessage = getUsersInCombat();
-                // We don't need to include ourself in this ready check
-                usersToMessage = usersToMessage.filter(u => !u.isGM && !combatant.testUserPermission(u, "OWNER"));
-
-                Hooks.callAll("initReadyCheck", reactionMessage, usersToMessage);
+        socket.on('module.mg-block-initiative', (actionId: string, combatantId: string) => {
+            switch (actionId) {
+                // TODO: Refactor this listener to handle both the reaction button it already was, plus handling disabling/enabling reaction buttons when the phase changes.
+                case "notifyReaction":
+                    if (game.userId === game.settings.get("mg-living-world-core", "GMProxy")) {
+                        const combatant = game.combat.combatants.filter(c => c.id === combatantId)[0];
+                        const reactionMessage = combatant.name + game.i18n.localize("BLOCKINITIATIVE.HasReacted");
+                        let usersToMessage = getUsersInCombat();
+                        // We don't need to include ourself in this ready check
+                        usersToMessage = usersToMessage.filter(u => !u.isGM && !combatant.testUserPermission(u, "OWNER"));
+    
+                        Hooks.callAll("initReadyCheck", reactionMessage, usersToMessage);
+                    }
+                    break;
+                case "changePhase":
+                    enableDisableReactionButtons(game.combat.getFlag("mg-block-initiative", "currentPhase") as string);
+                    break;
             }
+                 
         });
     }
 });
 
-Hooks.on("createCombat", async function(combat : Combat, _options: any, _userId: string ) {
+Hooks.on("createCombat", async function (combat: Combat, _options: any, _userId: string) {
     await combat.setFlag('mg-block-initiative', 'currentPhase', game.i18n.localize("BLOCKINITIATIVE.EnemiesAct"));
 });
 
@@ -104,6 +113,23 @@ Hooks.on("pf2e.startTurn", async function (combatant: Combatant, encounter: Comb
     if (encounter.getFlag('mg-ready-check', 'overrideNextTurn')) {
         encounter.data.turn = 0;
         encounter = await encounter.unsetFlag('mg-ready-check', 'overrideNextTurn');
+    }
+});
+
+Hooks.on("changePhase", function (newPhase: string) {
+    switch (newPhase) {
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersReact").replace('\n', ''):
+            changeToPlayersReact();
+            break;
+        case game.i18n.localize("BLOCKINITIATIVE.PlayersAct").replace('\n', ''):
+            changeToPlayersAct();
+            break;
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesReact").replace('\n', ''):
+            changeToEnemiesReact();
+            break;
+        case game.i18n.localize("BLOCKINITIATIVE.EnemiesAct").replace('\n', ''):
+            changeToEnemiesAct();
+            break;
     }
 });
 
@@ -251,7 +277,7 @@ function createPhaseTracker() {
         document.querySelector(".mg-phase-buttons").append(phase);
         phase.classList.add(side, "mg-phase-button");
         if (phaseName != currentPhase) {
-            phase.classList.add("inactive","mg-phase-button");
+            phase.classList.add("inactive", "mg-phase-button");
         }
         phase.innerText = phaseName;
     }
@@ -361,41 +387,43 @@ async function changePhase(newPhase?: string, changeRound?: boolean) {
             });
             break;
     }
+
+    Hooks.call("changePhase", newPhase);
 }
 
 function changeToPlayersReact(changeRound?: boolean) {
-    // TODO
+
 }
 
 function changeToPlayersAct(changeRound?: boolean) {
-
     game.combat.combatants.forEach((combatant: Combatant) => {
         if (combatant.hasPlayerOwner) {
             Hooks.call('pf2e.startTurn', combatant, game.combat);
         } else {
             Hooks.call('pf2e.endTurn', combatant, game.combat);
         }
+        enableDisableReactionButtons(game.i18n.localize("BLOCKINITIATIVE.PlayersAct"))
     });
-    // Trigger enemy end of turn effects.
-    // Trigger all player start of turn effects.
-    // TODO
+
 }
 function changeToEnemiesReact(changeRound?: boolean) {
-    // TODO
+
 }
 
 function changeToEnemiesAct(changeRound?: boolean) {
     game.combat.combatants.forEach((combatant: Combatant) => {
-        if (combatant.hasPlayerOwner) {
-            Hooks.call('pf2e.endTurn', combatant, game.combat);
-        } else {
+        if (!combatant.hasPlayerOwner) {
             Hooks.call('pf2e.startTurn', combatant, game.combat);
+        } else {
+            Hooks.call('pf2e.endTurn', combatant, game.combat);
         }
+        enableDisableReactionButtons(game.i18n.localize("BLOCKINITIATIVE.EnemiesAct"))
     });
-    // Trigger player end of turn effects
-    // Trigger enemy start of turn effects
-    // TODO
+    if (socket) {
+        socket.emit('module.mg-block-initiative', 'changePhase');
+    }
 }
+
 // If called with no parameters, changes to the next phase in sequence, otherwise it changes to the phase given as a parameter.
 // The sequence goes: Enemies Act -> Players React -> Players Act -> Enemies React -> Enemies Act and so forth.
 // When changing from Players React -> Players Act, trigger all end-of-turn effects on enemies, and all start-of-turn effects on players.
@@ -453,7 +481,6 @@ async function sortIntoBlockInitiative() {
             && encounterCombatant.initiative < initiative.playerInitMax
             && encounterCombatant.initiative >= initiative.playerInitMin) {
             await game.combat.setInitiative(encounterCombatant.id, initiative.playerInitMin - 1);
-
         }
     }
 }
@@ -502,19 +529,56 @@ function createReactionButton(combatant: Combatant) {
 
     // Add the button to the sidebar if it doesn't already exist
     if (!reactionButtonAlreadyPresent) {
-        reactionButton.on("click", function (event: JQuery.ClickEvent) {
-            event.preventDefault();
-
-            const combatantId = $(this).parent().parent().parent().attr('data-combatant-id')
-
-            if (socket) {
-                socket.emit('module.mg-block-initiative', combatantId);
-            }
-        });
+        reactionButton.on("click", reactionButtonListener);
         tokenEffects.before(reactionButton);
     }
 }
 
+function reactionButtonListener(event: JQuery.ClickEvent) {
+    event.preventDefault();
+
+    const combatantId = event.currentTarget.parentElement.parentElement.parentElement.attributes['data-combatant-id'].value;
+
+    if (socket) {
+        socket.emit('module.mg-block-initiative', "notifyReaction", combatantId);
+    }
+}
+
+function enableDisableReactionButtons(currentPhase: string) {
+    game.combat.combatants.forEach((combatant: Combatant) => {
+        const combatantRow = jQuery(`#combat-tracker > details > ol > li[data-combatant-id="${combatant.id}"]`);
+        const combatantReactionButton = combatantRow.find(`div.token-name > div.combatant-controls > a.combatant-control.mg-block-initiative.reaction`);
+
+        if (currentPhase === game.i18n.localize("BLOCKINITIATIVE.PlayersAct")) {
+            if (combatant.hasPlayerOwner) {
+                enableReactionButton(combatantReactionButton);
+            } else {
+                disableReactionButton(combatantReactionButton, false);
+            }
+        } else if (currentPhase === game.i18n.localize("BLOCKINITIATIVE.EnemiesAct")) {
+            if (combatant.hasPlayerOwner) {
+                disableReactionButton(combatantReactionButton, true);
+            } else {
+                enableReactionButton(combatantReactionButton);
+            }
+        } else {
+            enableReactionButton(combatantReactionButton);
+        }
+    });
+}
+
+function enableReactionButton(button: JQuery<HTMLElement>) {
+    button.attr('style', 'color: var(--color-text-light-1);');
+    button.on('click', reactionButtonListener);
+    button.attr('title', game.i18n.localize("BLOCKINITIATIVE.ReactionButton"));
+}
+
+function disableReactionButton(button: JQuery<HTMLElement>, isPlayer: boolean) {
+    const buttonText = isPlayer ? game.i18n.localize("BLOCKINITIATIVE.PlayersCannotReact") : game.i18n.localize("BLOCKINITIATIVE.EnemiesCannotReact")
+    button.attr('style', 'color: var(--color-text-dark-5);');
+    button.off('click', reactionButtonListener);
+    button.attr('title', buttonText);
+}
 /**
  * Gets an array of users that have a token in the current scene.
  * @returns The array of users
