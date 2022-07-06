@@ -4,7 +4,12 @@
 
   "BLOCKINITIATIVE.SortIntoBlocksButton" : "Sort combatants into blocks",
   "BLOCKINITIATIVE.ReactionButton" : "Use a reaction",
+  "BLOCKINITIATIVE.InvalidActionButton" : "Invalid Action",
+  "BLOCKINITIATIVE.ConfirmActionButton" : "Confirm Action",
+  
   "BLOCKINITIATIVE.HasReacted" : " has reacted.",
+  "BLOCKINITIATIVE.InvalidAction" : "'s action(s) are invalid, please select different action(s).",
+  "BLOCKINITIATIVE.ConfirmAction" : "'s action(s) need to be confirmed due to a change in circumstances.",
 
   "BLOCKINITIATIVE.EnemiesAct" : "Enemies \n Act",
   "BLOCKINITIATIVE.PlayersReact" : "Players \n React",
@@ -13,4 +18,6 @@
 
   "BLOCKINITIATIVE.PlayersCannotReact" : "Players cannot react during the Enemies Act phase, any reactions you wish to use will be made during the Players React phase.",
   "BLOCKINITIATIVE.EnemiesCannotReact" : "Enemies cannot react during the Players Act phase, any reactions you wish to use will be made during the Enemies React phase."
+
+  
 }

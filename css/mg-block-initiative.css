@@ -1,4 +1,4 @@
-.mg-block-initiative .reaction {
+.mg-block-initiative .mg-reaction, .mg-invalid-action, .mg-confirm-action{
     color: var(--color-text-light-1);
 }
 

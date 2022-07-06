@@ -23,24 +23,22 @@ Hooks.once("ready", () => {
     if (socket) {
         // create the socket handler
         socket.on('module.mg-block-initiative', (actionId: string, combatantId: string) => {
+            
             switch (actionId) {
                 // TODO: Refactor this listener to handle both the reaction button it already was, plus handling disabling/enabling reaction buttons when the phase changes.
                 case "notifyReaction":
-                    if (game.userId === game.settings.get("mg-living-world-core", "GMProxy")) {
-                        const combatant = game.combat.combatants.filter(c => c.id === combatantId)[0];
-                        const reactionMessage = combatant.name + game.i18n.localize("BLOCKINITIATIVE.HasReacted");
-                        let usersToMessage = getUsersInCombat();
-                        // We don't need to include ourself in this ready check
-                        usersToMessage = usersToMessage.filter(u => !u.isGM && !combatant.testUserPermission(u, "OWNER"));
-    
-                        Hooks.callAll("initReadyCheck", reactionMessage, usersToMessage);
-                    }
+                    sendReadyCheck(combatantId, game.i18n.localize("BLOCKINITIATIVE.HasReacted"), true);
+                    break;
+                case "notifyInvalidAction":
+                    sendReadyCheck(combatantId, game.i18n.localize("BLOCKINITIATIVE.InvalidAction"), false);
+                    break;
+                case "notifyConfirmAction":
+                    sendReadyCheck(combatantId, game.i18n.localize("BLOCKINITIATIVE.ConfirmAction"), false);
                     break;
                 case "changePhase":
                     enableDisableReactionButtons(game.combat.getFlag("mg-block-initiative", "currentPhase") as string);
-                    break;
-            }
-                 
+                    break;     
+            }    
         });
     }
 });
@@ -70,7 +68,7 @@ Hooks.on("renderCombatTracker", function (app: Application, html: JQuery, data: 
     }
 
     // Add "Reaction" buttons
-    createReactionButtons();
+    createCombatantButtons();
 
     overrideCombatControls();
 
@@ -133,6 +131,24 @@ Hooks.on("changePhase", function (newPhase: string) {
     }
 });
 
+function sendReadyCheck(combatantId : string, message : string, excludeCombatantOwner : boolean) {
+    if (game.userId === game.settings.get("mg-living-world-core", "GMProxy")) {
+        const combatant = game.combat.combatants.filter(c => c.id === combatantId)[0];
+        const reactionMessage = combatant.name + message;
+        let usersToMessage = getUsersInCombat();
+        // We don't need to include ourself in this ready check
+        const userFilter = excludeCombatantOwner ? (user : User) => {
+            !user.isGM && !combatant.testUserPermission(user, "OWNER")
+        }
+        :
+        (user : User) => {
+           !user.isGM
+        }
+        usersToMessage = usersToMessage.filter(userFilter);
+
+        Hooks.callAll("initReadyCheck", reactionMessage, usersToMessage);
+    }
+}
 function setEncounterStartPhase() {
     const handler = async () => {
         await game.combat.setFlag('mg-block-initiative', 'currentPhase', game.i18n.localize("BLOCKINITIATIVE.EnemiesAct"));
@@ -508,39 +524,62 @@ function createSortIntoBlocksButton() {
     }
 }
 
-function createReactionButtons() {
+function createCombatantButtons() {
     const currentUser = game.user;
     const currentCombatants = game.combat.data.combatants;
-    const ownedCombatants: Combatant[] = currentUser.isGM ?
-        currentCombatants.filter(combatant => combatant.isNPC) :
-        currentCombatants.filter(combatant => combatant.canUserModify(currentUser, "update"));
-    ownedCombatants.forEach(combatant => {
-        createReactionButton(combatant);
-    })
+    if (currentUser.isGM) {
+        currentCombatants.forEach(combatant => {
+            if (combatant.isNPC) {
+                createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.ReactionButton"), "mg-reaction", `<span class="activity-icon">R</span>`, reactionButtonListener); 
+            } else {
+                createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.InvalidActionButton"), "mg-invalid-action", `<i class="fas fa-ban"></i>`, invalidActionButtonListener); 
+                createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.ConfirmActionButton"), "mg-confirm-action", `<i class="fas fa-question"></i>`, confirmActionButtonListener);
+            }
+        })
+    } else {
+        const ownedCombatants: Combatant[] = currentCombatants.filter(combatant => combatant.canUserModify(currentUser, "update"));
+        ownedCombatants.forEach(combatant => {
+            createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.ReactionButton"), "mg-reaction", `<span class="activity-icon">R</span>`, reactionButtonListener); 
+        })
+    }
 }
+   
+    
 
-function createReactionButton(combatant: Combatant) {
-    const btnTitle: string = game.i18n.localize("BLOCKINITIATIVE.ReactionButton");
+function createCombatantButton(combatant : Combatant, buttonTitle: string, buttonClass: string, buttonIcon: string, buttonListener: (event: JQuery.ClickEvent) => void, ) {
+    const btnTitle: string = buttonTitle;
 
-    const reactionButton = $(`<a class="combatant-control mg-block-initiative reaction" style="color: var(--color-text-light-1)" title="${btnTitle}"><span class="activity-icon">R</span></a>`);
+    const combatantButton = $(`<a class="combatant-control mg-block-initiative ${buttonClass}" style="color: var(--color-text-light-1)" title="${btnTitle}">${buttonIcon}</a>`);
     const combatantRow = $("#combat-tracker").find(`[data-combatant-id=${combatant.id}]`);
     const tokenEffects = combatantRow.find(`.token-effects`);
-    const reactionButtonAlreadyPresent = combatantRow.find(`.token-effects > .combatant-control, .mg-block-initiative, .reaction`).length > 0;
+    const combatantButtonAlreadyPresent = combatantRow.find(`.combatant-control.mg-block-initiative.mg-confirm-action`).length > 0;
 
     // Add the button to the sidebar if it doesn't already exist
-    if (!reactionButtonAlreadyPresent) {
-        reactionButton.on("click", reactionButtonListener);
-        tokenEffects.before(reactionButton);
+    if (!combatantButtonAlreadyPresent) {
+        combatantButton.on("click", buttonListener);
+        tokenEffects.before(combatantButton);
     }
 }
 
 function reactionButtonListener(event: JQuery.ClickEvent) {
+    combatantButtonListener(event, "notifyReaction");
+}
+
+function invalidActionButtonListener(event: JQuery.ClickEvent) {
+    combatantButtonListener(event, "notifyInvalidAction");
+}
+
+function confirmActionButtonListener(event: JQuery.ClickEvent) {
+    combatantButtonListener(event, "notifyConfirmAction");
+}
+
+function combatantButtonListener(event: JQuery.ClickEvent, actionId: string) {
     event.preventDefault();
 
     const combatantId = event.currentTarget.parentElement.parentElement.parentElement.attributes['data-combatant-id'].value;
 
     if (socket) {
-        socket.emit('module.mg-block-initiative', "notifyReaction", combatantId);
+        socket.emit('module.mg-block-initiative', actionId, combatantId);
     }
 }
 
