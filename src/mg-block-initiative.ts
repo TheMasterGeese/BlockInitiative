@@ -41,6 +41,8 @@ Hooks.once("ready", () => {
             }    
         });
     }
+    const currentPhase : string = game.combat.getFlag("mg-block-initiative", "currentPhase") as string;
+    renderPhaseButtons(currentPhase);
 });
 
 Hooks.on("createCombat", async function (combat: Combat, _options: any, _userId: string) {
@@ -368,18 +370,7 @@ function getPreviousPhase(): string {
  */
 async function changePhase(newPhase?: string, changeRound?: boolean) {
 
-    const playersReactButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(1)`);
-    const playersActButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(2)`);
-    const enemiesReactButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(3)`);
-    const enemiesActButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(4)`);
-
-    [playersReactButton, playersActButton, enemiesReactButton, enemiesActButton].forEach(button => {
-        if (newPhase === button.textContent) {
-            button.classList.remove('inactive');
-        } else {
-            button.classList.add('inactive');
-        }
-    })
+    renderPhaseButtons(newPhase);
 
     switch (newPhase) {
         case game.i18n.localize("BLOCKINITIATIVE.PlayersReact").replace('\n', ''):
@@ -407,6 +398,20 @@ async function changePhase(newPhase?: string, changeRound?: boolean) {
     Hooks.call("changePhase", newPhase);
 }
 
+function renderPhaseButtons(newPhase : string) {
+    const playersReactButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(1)`);
+    const playersActButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(2)`);
+    const enemiesReactButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(3)`);
+    const enemiesActButton = document.querySelector(`#mg-phase-tracker > nav > div:nth-child(4)`);
+
+    [playersReactButton, playersActButton, enemiesReactButton, enemiesActButton].forEach(button => {
+        if (newPhase === button.textContent) {
+            button.classList.remove('inactive');
+        } else {
+            button.classList.add('inactive');
+        }
+    })
+}
 function changeToPlayersReact(changeRound?: boolean) {
 
 }
