@@ -1,1 +1,4 @@
-# Version 0.1.0
+# MG Living World - Block Initiative
+
+## Release 1.0.0
+Initial tag. Each time a new version is released fill this out with any changes.
