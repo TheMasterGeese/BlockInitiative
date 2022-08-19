@@ -4,11 +4,14 @@
 
 #mg-phase-tracker .mg-phase-buttons {
     flex-wrap: nowrap;
+    text-align: center;
+    
 }
 
 /* Style the phase "buttons" */
 #mg-phase-tracker .mg-phase-button {
     margin: 3px 0;
+    padding: 2px;
     border: 2px solid var(--color-border-dark, #000);
     line-height: 24px;
     border-radius: 5px;

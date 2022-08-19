@@ -23,7 +23,7 @@ Hooks.once("ready", () => {
     if (socket) {
         // create the socket handler
         socket.on('module.mg-block-initiative', (actionId: string, combatantId: string) => {
-            
+
             switch (actionId) {
                 // TODO: Refactor this listener to handle both the reaction button it already was, plus handling disabling/enabling reaction buttons when the phase changes.
                 case "notifyReaction":
@@ -37,8 +37,8 @@ Hooks.once("ready", () => {
                     break;
                 case "changePhase":
                     enableDisableReactionButtons(game.combat.getFlag("mg-block-initiative", "currentPhase") as string);
-                    break;     
-            }    
+                    break;
+            }
         });
     }
 });
@@ -60,7 +60,7 @@ Hooks.on("renderCombatTracker", function (app: Application, html: JQuery, data: 
     // Is displayed above all the combatants, but below the row containing the round counter, button to roll initiative, reset initiative, etc.
     // consists of 4 sections, displayed horizontally in this order: Enemies Act, Players React, Players Act, Enemies React
     // The Current phase is displayed differently than the Others
-    createPhaseTracker();
+    void createPhaseTracker();
 
     // Add "Sort Into Blocks" button
     if (game.user.role === 4) { // Render for GM
@@ -131,19 +131,20 @@ Hooks.on("changePhase", function (newPhase: string) {
     }
 });
 
-function sendReadyCheck(combatantId : string, message : string, excludeCombatantOwner : boolean) {
+
+function sendReadyCheck(combatantId: string, message: string, excludeCombatantOwner: boolean) {
     if (game.userId === game.settings.get("mg-living-world-core", "GMProxy")) {
         const combatant = game.combat.combatants.filter(c => c.id === combatantId)[0];
         const reactionMessage = combatant.name + message;
         let usersToMessage = getUsersInCombat();
         // We don't need to include ourself in this ready check
-        const userFilter = excludeCombatantOwner ? (user : User) => {
+        const userFilter = excludeCombatantOwner ? (user: User) => {
             !user.isGM && !combatant.testUserPermission(user, "OWNER")
         }
-        :
-        (user : User) => {
-           !user.isGM
-        }
+            :
+            (user: User) => {
+                !user.isGM
+            }
         usersToMessage = usersToMessage.filter(userFilter);
 
         Hooks.callAll("initReadyCheck", reactionMessage, usersToMessage);
@@ -172,40 +173,22 @@ function createCombatantGroups() {
     const groups = addUsersToGroups();
 
     // Go through each of the groups
-    groups?.forEach((group, index) => {
-        /** Toggle element */
-        const toggle = document.createElement("details");
-        toggle.classList.add("folder");
-        toggle.open = true;
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    groups?.forEach( async(group, index) => {
 
-        /** A subdirectory in the toggle which contains Combatants */
-        const subdirectory = document.createElement("ol");
-        subdirectory.classList.add("subdirectory");
-        toggle.append(subdirectory);
+        let combatantString = ''
 
-        // Go through each of the combatants
-        group.forEach((combatant, i, arr) => {
-            /** The DOM element of this combatant */
-            const element = document.querySelector(`[data-combatant-id="${combatant.id}"]`);
-
-            // If it's the last entry
-            if (i === arr.length - 1) {
-                // Add the toggle to the end
-                document.querySelector("#combat-tracker").prepend(toggle);
-
-                // Create a label for the toggle
-                const labelBox = document.createElement("summary");
-                labelBox.classList.add("mg-labelBox");
-                labelBox.classList.add("folder-header");
-                labelBox.innerText = i === 1 ? "Players" : "Enemies";
-                // Insert the label box
-                toggle.prepend(labelBox);
-
-            }
-
-            // Move the element into the subdirectory
-            subdirectory.append(element);
+        group.forEach((combatant) => {
+            const combatantElement = document.querySelector(`li[data-combatant-id="${combatant.id}"]`);
+            combatantString += combatantElement.innerHTML;
         });
+
+        const combatantGroup = await renderTemplate("modules/mg-block-initiative/handlebars/combatantGroup.hbs", {
+            playersOrEnemies: index === 1 ? "Players" : "Enemies",
+            combatants: combatantString
+        });
+
+        document.querySelector("#combat-tracker").insertAdjacentHTML('beforeend', combatantGroup);
     });
 }
 
@@ -265,37 +248,42 @@ function sortCombatants(a: Combatant, b: Combatant): number {
 /**
  * Creates the phase tracker UI element in the Combat Manager.
  */
-function createPhaseTracker() {
+async function createPhaseTracker() {
 
     const currentPhase = game.combat.getFlag('mg-block-initiative', 'currentPhase');
 
-    const phaseTracker = document.createElement("nav");
-    document.querySelector("#combat-tracker").before(phaseTracker);
-    phaseTracker.id = "mg-phase-tracker"
-    phaseTracker.classList.add("directory-header");
+    let phaseButtons = '';
 
-    const phaseTrackerButtons = document.createElement("nav");
-    document.querySelector("#mg-phase-tracker").append(phaseTrackerButtons);
-    phaseTrackerButtons.classList.add("flexrow", "mg-phase-buttons");
+    await createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesAct") as string);
+    await createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersReact") as string);
+    await createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersAct") as string);
+    await createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesReact") as string);
 
-    createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesAct") as string);
-    createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersReact") as string);
-    createPhase(COMBATANT_SIDE.PLAYERS, game.i18n.localize("BLOCKINITIATIVE.PlayersAct") as string);
-    createPhase(COMBATANT_SIDE.ENEMIES, game.i18n.localize("BLOCKINITIATIVE.EnemiesReact") as string);
+    try {
+        const phaseTracker = await renderTemplate("modules/mg-block-initiative/handlebars/phaseTracker.hbs", {
+            phases: phaseButtons
+        });
+        document.querySelector("#combat-tracker").insertAdjacentHTML('afterbegin', phaseTracker);
+    } catch (error) {
+        console.error('Could not construct combat phase from handlebar:', error)
+    }
 
     /**
-     * Helper function to create each of the block initiaitve phases
-     * @param side The side that acts during this phase, either enemies or players.
-     * @param phaseName The text to display as a label for this phase.
+     * Helper function to create each of the block initiative phases
+     * @param combatantSide The side that acts during this phase, either enemies or players.
+     * @param combatPhaseName The text to display as a label for this phase.
      */
-    function createPhase(side: COMBATANT_SIDE, phaseName: string) {
-        const phase = document.createElement("div");
-        document.querySelector(".mg-phase-buttons").append(phase);
-        phase.classList.add(side, "mg-phase-button");
-        if (phaseName != currentPhase) {
-            phase.classList.add("inactive", "mg-phase-button");
+    async function createPhase(combatantSide: COMBATANT_SIDE, combatPhaseName: string) {
+        try {
+            const renderedHTML = await renderTemplate("modules/mg-block-initiative/handlebars/combatPhase.hbs", {
+                side: combatantSide,
+                isActive: combatPhaseName === currentPhase ? '' : 'inactive',
+                phaseName: combatPhaseName
+            });
+            phaseButtons += renderedHTML;
+        } catch (error) {
+            console.error('Could not construct combat phase from handlebar:', error)
         }
-        phase.innerText = phaseName;
     }
 }
 
@@ -530,23 +518,23 @@ function createCombatantButtons() {
     if (currentUser.isGM) {
         currentCombatants.forEach(combatant => {
             if (combatant.isNPC) {
-                createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.ReactionButton"), "mg-reaction", `<span class="activity-icon">R</span>`, reactionButtonListener); 
+                createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.ReactionButton"), "mg-reaction", `<span class="activity-icon">R</span>`, reactionButtonListener);
             } else {
-                createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.InvalidActionButton"), "mg-invalid-action", `<i class="fas fa-ban"></i>`, invalidActionButtonListener); 
+                createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.InvalidActionButton"), "mg-invalid-action", `<i class="fas fa-ban"></i>`, invalidActionButtonListener);
                 createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.ConfirmActionButton"), "mg-confirm-action", `<i class="fas fa-question"></i>`, confirmActionButtonListener);
             }
         })
     } else {
         const ownedCombatants: Combatant[] = currentCombatants.filter(combatant => combatant.canUserModify(currentUser, "update"));
         ownedCombatants.forEach(combatant => {
-            createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.ReactionButton"), "mg-reaction", `<span class="activity-icon">R</span>`, reactionButtonListener); 
+            createCombatantButton(combatant, game.i18n.localize("BLOCKINITIATIVE.ReactionButton"), "mg-reaction", `<span class="activity-icon">R</span>`, reactionButtonListener);
         })
     }
 }
-   
-    
 
-function createCombatantButton(combatant : Combatant, buttonTitle: string, buttonClass: string, buttonIcon: string, buttonListener: (event: JQuery.ClickEvent) => void, ) {
+
+
+function createCombatantButton(combatant: Combatant, buttonTitle: string, buttonClass: string, buttonIcon: string, buttonListener: (event: JQuery.ClickEvent) => void,) {
     const btnTitle: string = buttonTitle;
 
     const combatantButton = $(`<a class="combatant-control mg-block-initiative ${buttonClass}" style="color: var(--color-text-light-1)" title="${btnTitle}">${buttonIcon}</a>`);
