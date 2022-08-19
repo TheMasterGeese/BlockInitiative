@@ -125,7 +125,7 @@ See [CHANGELOG](CHANGELOG.md)
 ## Contributing
 See [CONTRIBUTING](CONTRIBUTING.md)
 ## License
-Distributed under the MIT License. See [LICENSE](LICENSE.md) for more information.
+This work is licensed under the [Foundry Virtual Tabletop EULA - Limited License Agreement for Module Development](https://foundryvtt.com/article/license/) and [MIT License](LICENSE).
 
 ## Contact
 Contact MasterGeese via Discord (Khankar#2236) or email (themastergeese@gmail.com).
