@@ -1,20 +1,20 @@
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[version-shield]: https://img.shields.io/github/v/release/TheMasterGeese/MasterGeeseLivingWorldTools
-[version-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/releases/latest
-[forks-shield]: https://img.shields.io/github/forks/TheMasterGeese/MasterGeeseLivingWorldTools
-[forks-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/network/members
-[stars-shield]: https://img.shields.io/github/stars/TheMasterGeese/MasterGeeseLivingWorldTools
-[stars-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/stargazers
-[issues-shield]: https://img.shields.io/github/issues/TheMasterGeese/MasterGeeseLivingWorldTools
-[issues-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/issues
-[license-shield]: https://img.shields.io/github/license/TheMasterGeese/MasterGeeseLivingWorldTools
-[license-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/blob/master/LICENSE.md
-[last-updated-shield]: https://img.shields.io/github/last-commit/TheMasterGeese/MasterGeeseLivingWorldTools
+[version-shield]: https://img.shields.io/github/v/release/TheMasterGeese/mg-block-initiative
+[version-url]: https://github.com/TheMasterGeese/mg-block-initiative/releases/latest
+[forks-shield]: https://img.shields.io/github/forks/TheMasterGeese/mg-block-initiative
+[forks-url]: https://github.com/TheMasterGeese/mg-block-initiative/network/members
+[stars-shield]: https://img.shields.io/github/stars/TheMasterGeese/mg-block-initiative
+[stars-url]: https://github.com/TheMasterGeese/mg-block-initiative/stargazers
+[issues-shield]: https://img.shields.io/github/issues/TheMasterGeese/mg-block-initiative
+[issues-url]: https://github.com/TheMasterGeese/mg-block-initiative/issues
+[license-shield]: https://img.shields.io/github/license/TheMasterGeese/mg-block-initiative
+[license-url]: https://github.com/TheMasterGeese/mg-block-initiative/blob/master/LICENSE.md
+[last-updated-shield]: https://img.shields.io/github/last-commit/TheMasterGeese/mg-block-initiative
 
-# Master Geese's Living World Tools
+# MG Living World - Block Initiative
 
-This repository acts as both a template for new Living World modules and as a testing ground for new tools or improvements to the workflow of existing modules.
+MG Living World - Block Initiative overhauls how initiative works in combat encounters to support an asynchronous session-less way of running games. This module was built with the Pathfinder 2E system in mind, but should apply to many d20-based systems in a similar manner, support may be added for other systems later.
 
 [![Version][version-shield]][version-url]
 ![Last Updated][last-updated-shield]
@@ -23,125 +23,100 @@ This repository acts as both a template for new Living World modules and as a te
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 
-Based on [Dragon Flagon TS Automated Module template](https://github.com/flamewave000/fvtt-module-template) by flamewave000.
 ### Table of Contents
 
-- [How to Use](#How-to-Use)
-- [Folder Structure](#Folder-Structure)
-- [Project Files](#Project-Files)
-- [Module Manifest File](#Module-Manifest-File)
-- [NPM Package File](#NPM-Package-File)
+- [Block Initiative](#Block-Initiative)
+- [Initiative Handicap](#Initiative-Handicap)
+- [Combat Phases](#Combat-Phases)
+- [Reselecting Actions](#Reselecting-Actions)
+- [System Ramifications](#System-Ramifications)
 - [Changelog](#Changelog)
 - [Contributing](#Contributing)
 - [License](#License)
+- [Contact](#Contact)
 
-## How to Use
+## Overview
 
-First, perform the necessary steps to set up your development environment under [CONTRIBUTING](CONTRIBUTING.md). If you are setting up
-the development environment for a specific MG Living World module, that module's repository may have additional setup steps under its
-own CONTRIBUTING.md file.
+The Block Initiative Module overhauls how initiative works in the Pathfinder 2E system, to help support running campaigns in an asynchronous manner. This manner of running a campaign requires coordinating actions taken by both a Gamemaster and the Players, and ensuring that all parties are kept up to speed with the current state of the game.
 
-## Folder Structure
+This module organizes running combat for such a system. The Block Initiative module can also be used for in-person and/or session-based campaigns as a way to organize simultaneous turns and collaboration among the party, campaigns that use the module this way may find it useful to disable some of the Ready Checks normally used by this module.
 
-| Folder Name             | Description                                                  |
-| ----------------------- | ------------------------------------------------------------ |
-| `bundle/`               | Contains the final module.json and .zip files that are produced by your build. |
-| `css/` (optional)       | The directory containing any CSS you might have. This is an optional directory as not every module is going to be editing HTML. If you exclude this, make sure to remove the `"styles": "{{css}}"` field from the `module.json` file. |
-| `dist/` (generated)     | This will contain the compiled source code, templates, project files, styles, and manifest generated during the build process. These will be exported to the bundle/ directory during the build process, and this folder will be cleared out as a result. |
-| `lang/`                 | The directory containing your localization strings files.    |
-| `node_modules/` (generated) | Contains all of your installed npm packages required for development or for the module itself. Is excluded from the Github repository. |
-| `src/`                  | The directory containing all of your `.js` and `.ts` code files. |
-| `templates/` (optional) | The directory containing your Handlebars HTML template files. This is an optional directory. This is an optional directory as not every module is going to be editing HTML. |
-| `tests/`                | The directory containing all of your test files. |
-| `types/`                | Contains types that cannot be downloaded via npm, such as the PF2E system's types. |
-| `worlds/`               | The directory containing all of your worlds. Includes at least one world for testing purposes.|
+## Block Initiative
 
-[top](#table-of-contents)
+Instead of each combatant being given their own separate turn to act in initiative order, combatants are now organized into blocks: one block for Players, and one for all other combatants. This block is referred to as the Enemies block, but any NPC allies or neutral parties controlled by the Gamemaster would also be included in this block.
 
-## Project Files
+Combatants roll initiative as they would in their normal d20-based system. When all combatants have rolled initiative, they are placed into blocks by doing the following:
+- Apply the Initiative Handicap to all Player Characters.
+- Any NPCs that beat all Player Characters in initiative get to act first in combat. All other NPCs are placed in the Enemies block, which acts after all the players have taken their first actions in the Players Act phase.
 
-| File            | Description                                                  |
-| --------------- | ------------------------------------------------------------ |
-| `.env` (created)   | Contains all your environment variables, specific to your current dev environment. |
-| `.eslintrc `    | Configuration file for ESLint. |
-| `.gitignore`    | This is used to ignore files and folders you don't want to be included in the git repository. |
-| `CHANGELOG.md`  | A Markdown file for describing the module's history of changes. |
-| `CONTRIBUTING.md` | A Markdown file for describing how to contribute to this repository, as well as any guidance that applies to all MG Living World modules. |
-| `css/samplecss.css` | Template for a css file to be included in a new module. |
-| `docker-compose.yml`  | Configuration for docker to download the appropriate docker image and build the container. |
-| `env-sample`  | Template for .env file to be renamed into .env when creating a new module or checking out this repository locally. |
-| `gulpfile.js`   | Gulp File that contains the various build scripts used automating the module linting, testing, development, building, and packaging. |
-| `lang/samplelang.json` | Template for an initial lang file in a new module. |
-| `LICENSE`       | The Copyright License for your module. MG Living World modules use the MIT license.|
-| `module.json`   | The FoundryVTT Module Manifest file that describes everything about your module. |
-| `package-lock.json`  | Tracks the exact version of each package installed. Is included in the repo, to ensure 100% reproduction of the environment across machines. |
-| `package.json`  | The NPM Package configuration. May contain additional build scripts. |
-| `playwright.config.ts`  | Configuration for Playwright to test your module. |
-| `README.md`     | Markdown file you can use to describe what your module is and how to use it. |
-| `src/index.ts`  | Template for an initial typescript file in a new module. | 
-| `tests/example.spec.ts` | Template for Integration tests in a new module. |
-| `tests/TestEnvironmentSample.ts` | Template for TestEnvironment.ts file to be renamed into TestEnvironment.ts when creating a new module or checking out this repository locally. |
-| `tsconfig.json` | TypeScript configuration. This defines the various settings used by the TypeScript transpiler. |
+### Initiative Handicap
 
-[top](#table-of-contents)
+The Block Initiative system described above inherently disadvantages NPCs, since regardless of whether they rolled the lowest initaitive, whether they beat all but one PC in initiative, or anywhere in between, they are forced to the bottom of initiative order. When analyzing just how often an NPC would be negatively affected by the Block Initiative system compared to a typical d20 initiative system the math works out to a 16.625% chance that a monster acts later than they normally would, weighted based on the difference between the position in both systems. (TODO: Show the math in more detail) This chance is consistent regardless of the number of NPCs or Players. To offset this, a handicap is placed on Player initiative rolls, which is applied as combatants are sorted into blocks. The handicap defaults to a -3 penalty, giving NPCs a 15% better initiative score overall. The value of this handicap can be adjusted in the settings.
 
+### Combat Phases
 
-| Command             | Description                                                  |
-| ------------------- | ------------------------------------------------------------ |
-| `npx gulp`             | This is the basic Build command, it will execute all the steps below (except watch) in the order given. |
-| `npx gulp lint`     | Lints your code, looking for code format/style/best practice improvements that can be made and applying any fixes that can be done automatically. If there are any errors, the build process stops after this step finishes executing. Continues execution if there are no findings or all findings are only warnings. |
-| `npx gulp dev`     | Clears out the development directory, then build your module and copy it to your dev environment's modules/ folder. |
-| `npx gulp outputTesWorld` | Copies the contents of worlds/testWorld into your foundrydata/Data/worlds/ folder. |
-| `npx gulp test` | Spins up an instance of FoundryVTT in a docker container, then runs all integration tests against this container using playwright. When tests are complete, the container is removed. |
-| `npx gulp watch` | Builds your module as the dev command does, but also keeps the process running, so that if any of the files that would be published via the dev command are changed, they will automatically be pushed to the corresponding dev directory.|
-| `npx playwright test` | Runs integration tests without setting up/tearing down the docker container first. Also shows test-by-test output in the terminal where the npx gulp test command does not. |
-| `docker-compose up -d` | Starts a docker container containing a running FoundryVTT server. If the image is not present on the local achine, or is out of date, the latest version will be downloaded before building it. |
-| `docker-compose down` | Stops and removes the currently-running FoundryVTT container. |
-| `npx eslint --fix ./src/**/*` | Runs eslint manually, without using gulp.
+TODO: Based on the most recent dry run of this system, The organization of combat phases below is likely to change before being fully released:
 
-[top](#table-of-contents)
+Instead of each individual combatant taking their own turn, each combat round is split into a number of phases, which progress in the following order:
 
+Enemies Act -> Players React -> Players Act -> Enemies React
 
-## Module Manifest File
+After initiative is rolled, combat begins with the Enemies Act phase, where any NPCs that beat all PCs in initiative get to act. If no NPCs beat all the PCs in initiative, then this phase and the Players React phase are skipped during the first round of Combat.
 
-The module manifest does not contain too much that needs to be updated. There are certain variables that will be available when building. The manifest runs through a compilation and is injected with data from the build process and output to the `dist/` directory along with everything else.
+#### Enemies Act
 
-| Build Variables | Description                                                  |
-| --------------- | ------------------------------------------------------------ |
-| `{{name}}`      | The Module's package name. This will not be visible to users, but must be a unique name in the FoundryVTT module system.<br />*This value is defined in the `package.json`* |
-| `{{title}}`     | The User facing name for the module.<br />*This value is defined in the `package.json`* |
-| `{{version}}`   | The version of the module. This should follow the standardized [Semantic Versioning](https://semver.org).<br />*This value is defined in the `package.json`* |
-| `{{sources}}`   | The `"{{sources}}"` portions(including the quotes) will be replaced with a JSON array of all source files found in the `src/` directory.<br />*This is assembled at build time.* |
-| `{{css}}`       | The `"{{css}}"` portion (including the quotes) will be replaced with a JSON array of all styling files found in the `css/` directory.<br />*This is assembled at build time.* |
+During this phase, all NPCs will declare their actions, but do not resolve their effects. In the Pathfinder 2E system, this means that enemies can take their 3 (or more) actions, and make any rolls associated with these actions, including but not limited to attack rolls, skill checks, damage rolls, flat checks versus effects such as concealment, etc. Actions spent to move resolve during this phase, but effects from these actions that would affect players, such as damage or status conditions do not resolve yet. If enemies have reactions or free actions that would trigger off the actions of themselves or their allies, these also trigger during this phase.
 
-The `module.json` file contains sections that will need to be updated. These include:
-| Property Name   | Description                                                  |
-| --------------- | ------------------------------------------------------------ |
-| `author`        | Your name should go here. |
-| `url`           | The URL of your project should go here.
-| `license`       | The path to your project's LICENSE file should go here.
-| `manifest`      | The path to your module's latest package manifest (module.json file) should go here.
-| `download`      | The path to the latest release of your project (in .zip format) should go here.
-| `readme`        | The path to your project's README file should go here. |
-| `changelog`     | The path to yout project's CHANGELOG file should go here. |
+In the event that multiple actions taken by NPCs would conflict with each other, the NPC with the highest inititative has priority for resolving actions. If one action takes by an NPC invalidates another NPC's action, the latter must take any actions they can, and then change their remaining actions so that they are now valid.
 
-[top](#table-of-contents)
+The GM will be controlling all NPCs, and should take into consideration their intelligence and cohesiveness when deciding how they will act; mindless creatures such as slimes or zombies should disregard their allies when choosing their actions, possibly getting in the way of other NPCs or being stuck behind them. Intelligent creatures or creatures that are accustomed to working together should anticipate each other's actions and act accordingly. Creatures that are aware of player characters and their capabilities should work to gang up on the most fragile party members and lock down any others. After the GM has finalized the actions of all NPCs, combat proceeds to the Players React phase.
 
-## NPM Package File
+#### Players React
 
-The NPM Package file is used by NPM to handle the project dependencies and to run the Gulp builder. There are a couple of things that need to be updated in this file for your new module.
+During this phase, all actions taken by enemies resolve based on their initiative order, and players may take any reactions accordingly. For instance, in the Pathfinder 2E system, if an enemy moves out of reach of a Fighter, that fighter may use their Attack of Opportunity reaction. Any reactions taken resolve immediately. Reactions are resolved using a "stack"; They always resolve in the reverse order they were triggered.For example, if the Fighter's attack of opportunity triggered a reaction from an NPC to dodge, adding a bonus to their armor class, that bonus would be applied before the attack of opportunity, possibly lowering its degree of success.
 
-| Property Name   | Description                                                  |
-| --------------- | ------------------------------------------------------------ |
-| `name`          | Update this to your unique package name (no spaces!) |
-| `title`         | Update this with the displayed name. |
-| `version`       | This is the [Semantic Version](https://semver.org/) of your module |
-| `main`          | Main entry point into your module. Will be injected into manifest. You can also make it an array if you have more than one entry point that needs to run. |
-| `description`   | The short description FoundryVTT shows in the Module Managers |
-| `scripts`(optional) | This is where npm scripts are defined. Does not include npx or docker scripts. Not all modules will have this property. |
-| `dependencies` (optional)  | These are the NPM dependencies used to compile the project. Not all modules will have dependencies. Note that dependencies on other FoundryVTT modules should be specified in the module.json file instead.|
-| `devDependencies`  | These are the NPM dependencies used to build the project. |
+Rolls such as saving throws that players would be required to make in response to an NPC's effect also resolve at this time.
 
+If a player's reaction invalidates the remaining actions or reactions of NPCs, those NPCs must reselect how to use their remaining actions. For instance, if an NPC planned to use 2 actions to cast an spell that requires a living ally, but the targeted ally was killed due to the Fighter's Attack of Opportunity, they NPC must select a different way to use the two remaining actions.
+
+When the effects of NPC actions resolve, apply any effects such as damage, status effects, summoning creatures, creating terrain obstacles, etc.
+
+When all players have used their reactions or elected not to react, each player signals that they are Ready. After all players and the GM are ready, combat proceeds to the Players Act phase.
+
+### Players Act
+
+Like the Enemies Act phase, this phase is when players will choose their actions for the round, but their effects do not yet resolve. Players are expected to use chat messages, drawing tools, or any other tools available to them to state their intended actions for the round. Players are encouraged to strategize with each other, to avoid having their actions conflict with one another. Players may resolve their turns in any order, however each player must take a full turn before resolving the actions of any other player, and turn order must be decided upon before players undertake their actions. When players are satisied with their actions, they may signal that they are Ready.
+
+In the event that multiple actions taken by players would conflict with each other, the Player with the highest initiative has priority for resolving actions. Actions and turns must resolve in the order agreed upon, players cannot change their turn order in response to an unexpected development while undertaking their actions. If one action takes by a player invalidates another player action, the latter must take any actions they can, and then change their remaining actions so that they are now valid.
+
+After all players signal that they are ready, they make any movement, checks, or other rolls their actions would entail, such as attack rolls, damage rolls skill checks, flat checks to hit concealed creatures, etc. Effects from these actions that would affect enemies, such as damage or status conditions do not resolve yet. If players have reactions or free actions that would trigger off each other's actions, these also trigger during this phase. When all players have made their checks, they once again signal that they are Ready. When all players are ready, combat proceeds to the Enemies React phase.
+
+### Enemies React
+
+During this phase, all actions taken by players resolve based on the agreed upon turn order, and enemies may take any reactions accordingly. 
+
+Rolls such as saving throws that enemies would be required to make in response to an NPC's effect also resolve at this time.
+
+If an enemy's reaction invalidates the remaining actions or reactions of players, those players must reselect how to use their remaining actions. For instance, if a player planned to move to a particular square, but an enemy's reaction creates an impassable barrier that prevents the player from moving there, they must take any actions they can to move up to the barrier, but must select a different way to use their remaining actions.
+
+When the effects of player actions resolve, apply any effects such as damage, status effects, summoning creatures, creating terrain obstacles, etc.
+
+When all players actions resolve, combat proceeds to a new round, starting with the Enemies Act phase.
+
+## Reselecting Actions
+
+TODO
+
+Use common sense, creatures would not willingly run into a wall of fire even though they technically could and they aren't prevented from doing so
+
+## System Ramifications
+
+TODO
+
+Ganging up is more common, combats are a lot more swingy, it can be very dangerous for PCs to advance into melee all by themselves.
+It better represents the chaos of combat than a system based on individual character turns.
+
+The system may feel slow at first, but is demonstrably faster than a system based on individual character turns; the worst case scenario is that every single action causes conflicts, in which case one turn resolves at a time; no different from an approach based on individual character turns.
 
 [top](#table-of-contents)
 
@@ -151,3 +126,6 @@ See [CHANGELOG](CHANGELOG.md)
 See [CONTRIBUTING](CONTRIBUTING.md)
 ## License
 Distributed under the MIT License. See [LICENSE](LICENSE.md) for more information.
+
+## Contact
+Contact MasterGeese via Discord (Khankar#2236) or email (themastergeese@gmail.com).
