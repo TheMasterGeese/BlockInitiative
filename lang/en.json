@@ -1,47 +1,23 @@
 {
-  "BLOCKINITIATIVE.ChatTextCheck": "is ready!",
-  "BLOCKINITIATIVE.ChatTextUserUpdate": "has updated their status to",
+  "BLOCKINITIATIVE.SettingsInitiativeHandicapTitle" : "Initiative Handicap",
+  "BLOCKINITIATIVE.SettingsInitiativeHandicapHint" : "Block Initiative inherently puts enemies at a disadvantage. To offset this, players may be given a modifier to their initiative rolls (The recommended value is -3).",
 
-  "BLOCKINITIATIVE.DialogContentReadyCheck": "Your GM has has initiated a Ready Check. Click the button below when you're ready to play!",
-  "BLOCKINITIATIVE.DialogContentStatusUpdate": "Please select an option below to update your ready status.",
-  "BLOCKINITIATIVE.DialogTitleReadyCheck": "Ready Check",
-  "BLOCKINITIATIVE.DialogTitleStatusUpdate": "Update Ready Status",
+  "BLOCKINITIATIVE.SortIntoBlocksButton" : "Sort combatants into blocks",
+  "BLOCKINITIATIVE.ReactionButton" : "Use a reaction",
+  "BLOCKINITIATIVE.InvalidActionButton" : "Invalid Action",
+  "BLOCKINITIATIVE.ConfirmActionButton" : "Confirm Action",
+  
+  "BLOCKINITIATIVE.HasReacted" : " has reacted.",
+  "BLOCKINITIATIVE.InvalidAction" : "'s action(s) are invalid, please select different action(s).",
+  "BLOCKINITIATIVE.ConfirmAction" : "'s action(s) need to be confirmed due to a change in circumstances.",
 
-  "BLOCKINITIATIVE.ErrorNotGM": "Only GMs may initiate ready checks.",
+  "BLOCKINITIATIVE.EnemiesAct" : "Enemies \n Act",
+  "BLOCKINITIATIVE.PlayersReact" : "Players \n React",
+  "BLOCKINITIATIVE.PlayersAct" : "Players \n Act",
+  "BLOCKINITIATIVE.EnemiesReact" : "Enemies \n React",
 
-  "BLOCKINITIATIVE.GmDialogTitle": "Ready Check GM Options",
-  "BLOCKINITIATIVE.GmDialogContent": "What action would you like to perform?",
-  "BLOCKINITIATIVE.GmDialogButtonCheck": "Start A Ready Check",
-  "BLOCKINITIATIVE.GmDialogButtonStatus": "Set My Ready Status",
+  "BLOCKINITIATIVE.PlayersCannotReact" : "Players cannot react during the Enemies Act phase, any reactions you wish to use will be made during the Players React phase.",
+  "BLOCKINITIATIVE.EnemiesCannotReact" : "Enemies cannot react during the Players Act phase, any reactions you wish to use will be made during the Enemies React phase."
 
-  "BLOCKINITIATIVE.PlayerReady": "Player is Ready",
-  "BLOCKINITIATIVE.PlayerNotReady": "Player is Not Ready",
-
-  "BLOCKINITIATIVE.SettingsChatMessagesForChecksTitle": "Display Ready Check Chat Messages",
-  "BLOCKINITIATIVE.SettingsChatMessagesForChecksHint": "Toggle this on to display a chat message when a player responds to a ready check.",
-  "BLOCKINITIATIVE.SettingsChatMessagesForUserUpdatesTitle": "Display User Update Chat Messages",
-  "BLOCKINITIATIVE.SettingsChatMessagesForUserUpdatesHint": "Toggle this on to display a chat message when a player changes their ready status while no ready check is active.",
-
-  "BLOCKINITIATIVE.SettingsPlayAlertForChecksTitle": "Play Alert When Ready Check Starts",
-  "BLOCKINITIATIVE.SettingsPlayAlertForChecksHint": "Toggle this on to play a sound when a ready check is started.",
-
-  "BLOCKINITIATIVE.SettingsCheckAlertSoundPathTitle": "Ready Check Alert Sound Path",
-  "BLOCKINITIATIVE.SettingsCheckAlertSoundPathHint": "Enter the path of the sound to play when a ready check is started. Leaving this blank will play the default ring sound.",
-
-  "BLOCKINITIATIVE.StatusReady": "Ready",
-  "BLOCKINITIATIVE.StatusNotReady": "Not Ready",
-
-  "BLOCKINITIATIVE.UiChangeButton": "Change Ready Status",
-  "BLOCKINITIATIVE.UiGmButton": "Initiate Ready Check or Change Ready Status",
-
-  "BLOCKINITIATIVE.DiscordUrl": "https://discord.com/api/v7/webhooks/924104257601437737/kcQyyqEhSzaPrVEgbc98Wwt7KEEOnQuuz-o-Uj9ly4D7uJKSp9UefrJlkEY9WwpcDFd8",
-
-  "BLOCKINITIATIVE.EnemiesActMessage": "All enemies have reacted. Next, Enemies Act.",
-  "BLOCKINITIATIVE.PlayersReactMessage": "All enemies have acted. Next, Players React.",
-  "BLOCKINITIATIVE.PlayersActMessage": "All players have reacted. Next, Players Act.",
-  "BLOCKINITIATIVE.ResolvePlayerActionsMessage": "All players are ready to act, Resolve player actions.",
-  "BLOCKINITIATIVE.EnemiesReactMessage": "All players have acted. Next, Enemies React.",
-  "BLOCKINITIATIVE.EnemyReactionMessage": "<enemy> has reacted to <player>. Ready Check has been reset.",
-  "BLOCKINITIATIVE.PlayerReactionMessage": "<player> has reacted to <enemy>. Ready Check has been reset.",
-  "BLOCKINITIATIVE.PlayerActionFizzledMessage": "Some of your Actions have been made invalid. Please reselect your remaining Actions."
+  
 }

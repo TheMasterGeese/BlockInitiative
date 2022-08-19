@@ -1,0 +1,54 @@
+.mg-block-initiative .mg-reaction, .mg-invalid-action, .mg-confirm-action{
+    color: var(--color-text-light-1);
+}
+
+#mg-phase-tracker .mg-phase-buttons {
+    flex-wrap: nowrap;
+}
+
+/* Style the phase "buttons" */
+#mg-phase-tracker .mg-phase-button {
+    margin: 3px 0;
+    border: 2px solid var(--color-border-dark, #000);
+    line-height: 24px;
+    border-radius: 5px;
+}
+
+/* Fade out inactive phases */
+#mg-phase-tracker .inactive {
+    opacity: 0.5;
+}
+
+/* Style the first one in the row so that the corners are rounded correctly and so there is a margin on the left */
+#mg-phase-tracker .mg-phase-buttons:first-child {
+    margin-left: 3px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+  
+/* Style the last one in the row so that the corners are rounded correctly and so there is a margin on the right */
+#mg-phase-tracker .mg-phase-buttons:last-child {
+    margin-right: 3px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+#mg-phase-tracker .enemies {
+    background-color: rgb(200, 36, 36);
+}
+
+#mg-phase-tracker .players {
+    background-color: rgb(36, 36, 200);
+}
+
+.mg-labelBox {
+    text-shadow: 1px 1px 4px var(--color-shadow-dark, #000);
+    cursor: pointer;
+    line-height: calc(var(--sidebar-item-height, 48px) / 2);
+    padding: 0 6px;
+    background: rgba(0, 0, 0, 0.5);
+    border-top: 1px solid var(--color-border-dark, #000);
+    border-bottom: 1px solid var(--color-border-dark, #000);
+    margin: auto 0;
+    flex-grow: 1;
+}
